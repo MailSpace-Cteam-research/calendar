@@ -7,6 +7,18 @@ import '@vkontakte/vkui-tokens/themes/calendar/cssVars/declarations/onlyVariable
 import '@vkontakte/vkui-tokens/themes/calendarDark/cssVars/declarations/onlyVariablesLocal.css';
 import './styles.css';
 import App from './App';
+import Calendar from './calendar/Calendar';
+
+/** Основа Календаря по макету — по умолчанию; прежний концепт формы — по адресу #concept */
+function Screen() {
+  const [hash, setHash] = useState(location.hash);
+  useEffect(() => {
+    const on = () => setHash(location.hash);
+    addEventListener('hashchange', on);
+    return () => removeEventListener('hashchange', on);
+  }, []);
+  return hash === '#concept' ? <App /> : <Calendar />;
+}
 
 /** Артефакт может явно выставить тему через data-theme на <html>; иначе VKUI берёт prefers-color-scheme */
 function useHostColorScheme() {
@@ -32,7 +44,7 @@ function Root() {
       tokensClassNames={{ light: 'vkui--calendar--light', dark: 'vkui--calendar--dark' }}
     >
       <AppRoot>
-        <App />
+        <Screen />
       </AppRoot>
     </ConfigProvider>
   );

@@ -1,0 +1,437 @@
+/* Основа Календаря, pixel perfect к макету Figma «Неделя» 1366×820.
+   Размеры — из макета, цвета и шрифты — токены темы calendar. Свои значения — только то, чего в теме нет. */
+.cal {
+  --cal-bg: #f6f7fb;           /* фон страницы из макета; в теме calendar --vkui--color_background белый */
+  --cal-nav-bg: #27303b;       /* Other/SuperappMenuBackground */
+  --cal-line: var(--vkui--color_field_border_alpha);
+  --cal-elev-event: 0 4px 12px 0 rgba(0, 16, 61, 0.04), 0 4px 40px 0 rgba(0, 16, 61, 0.12); /* calendarElevationEventWeek */
+  --cal-hour: 56px;
+
+  position: fixed;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  background: var(--cal-bg);
+  color: var(--vkui--color_text_primary);
+  font-family: 'VK Sans Display', var(--vkui--font_family_base);
+  -webkit-font-smoothing: antialiased;
+}
+.cal * { box-sizing: border-box; }
+
+/* типографика из макета → токены compact */
+.cal-compose, .cal-month__title, .cal-group__title, .cal-side__btn, .cal-btn, .cal-gridnav__title {
+  font-size: var(--vkui--font_headline1--font_size--compact);
+  line-height: var(--vkui--font_headline1--line_height--compact);
+  font-weight: var(--vkui--font_headline1--font_weight--compact);
+}
+
+/* ---------- навбар сервисов ---------- */
+.cal-nav {
+  position: relative;
+  flex: none;
+  width: 60px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--cal-nav-bg);
+  color: var(--vkui--color_icon_contrast);
+}
+.cal-nav__logo {
+  width: 32px;
+  height: 32px;
+  margin: 4px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--vkui--color_background_accent);
+}
+.cal-nav__list { display: flex; flex-direction: column; gap: 4px; }
+.cal-nav__item {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+.cal-nav__item.is-active { background: rgba(255, 255, 255, 0.2); }
+.cal-nav__bottom {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--cal-nav-bg);
+}
+.cal-nav__profile { width: 40px; height: 40px; display: grid; place-items: center; }
+
+/* ---------- левая панель ---------- */
+.cal__content { flex: 1; min-width: 0; display: flex; }
+.cal-side {
+  flex: none;
+  width: 250px;
+  padding: 12px 0 8px;
+  display: flex;
+  flex-direction: column;
+}
+.cal-side__compose { padding: 0 12px; }
+.cal-compose {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--vkui--color_field_border_alpha);
+  border-radius: 10px;
+  background: var(--vkui--calendar_color_sidebar_compose_button_background);
+  color: var(--vkui--color_text_primary);
+}
+.cal-icon-btn {
+  flex: none;
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  color: var(--vkui--calendar_color_sidebar_item_icon_primary);
+}
+
+.cal-month { padding: 4px 12px; }
+.cal-month__head { display: flex; align-items: center; }
+.cal-month__title { flex: 1; text-align: center; color: var(--vkui--calendar_color_sidebar_item_text_primary); }
+.cal-month__row, .cal-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 32px);
+  justify-content: space-between;
+}
+.cal-month__grid { row-gap: 2px; }
+.cal-month__cell {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: var(--vkui--font_footnote--font_size--compact);
+  line-height: var(--vkui--font_footnote--line_height--compact);
+  font-weight: var(--vkui--font_footnote--font_weight--compact);
+  color: var(--vkui--calendar_color_sidebar_item_text_primary);
+}
+.cal-month__cell.is-muted { color: var(--vkui--calendar_color_sidebar_item_text_secondary); }
+.cal-month__cell.is-today {
+  border-radius: 11px;
+  padding-bottom: 2px;
+  background: var(--vkui--color_background_accent);
+  color: var(--vkui--color_text_contrast);
+}
+.cal-month__cell.is-today::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 22px;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--vkui--color_icon_contrast);
+}
+
+.cal-side__list {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cal-group__row {
+  height: 36px;
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+}
+.cal-group__chevron { flex: none; color: var(--vkui--calendar_color_sidebar_item_icon_primary); }
+.cal-group__title { flex: 1; min-width: 0; color: var(--vkui--calendar_color_sidebar_item_text_primary); }
+.cal-group__item {
+  height: 36px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  font-size: var(--vkui--font_text--font_size--compact);
+  line-height: var(--vkui--font_text--line_height--compact);
+  font-weight: var(--vkui--font_text--font_weight--compact);
+  color: var(--vkui--calendar_color_sidebar_item_text_primary);
+}
+.cal-group__item svg { flex: none; }
+.cal-side__bottom { padding: 0 8px; }
+.cal-side__btn {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  color: var(--vkui--calendar_color_sidebar_item_text_primary);
+}
+.cal-side__btn svg { flex: none; color: var(--vkui--calendar_color_sidebar_item_icon_primary); }
+
+/* ---------- шапка сетки ---------- */
+.cal__area {
+  flex: 1;
+  min-width: 0;
+  margin: 0 12px 0 8px;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.cal-gridnav { flex: none; height: 36px; padding-left: 8px; display: flex; align-items: center; }
+.cal-btn {
+  flex: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  white-space: nowrap;
+  color: var(--vkui--color_text_primary);
+}
+.cal-btn--secondary { border-radius: 8px; background: var(--vkui--color_background_secondary_alpha); }
+.cal-btn--icon { padding: 10px; border-radius: 8px; display: flex; color: var(--vkui--color_icon_primary); }
+.cal-btn--tab { color: var(--vkui--color_text_secondary); }
+.cal-btn--tab.is-active { color: var(--vkui--color_text_primary); }
+.cal-gridnav__title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- неделя ---------- */
+.cal-week { flex: 1; min-height: 0; margin-top: 5px; display: flex; flex-direction: column; }
+.cal-week__head { flex: none; padding-top: 16px; display: flex; }
+.cal-week__gutter, .cal-timeline { flex: none; width: 44px; }
+
+/* ширины колонок по макету: сегодня — 244, выходные — по 100, остальные делят остаток */
+.cal-dayhead, .cal-col { flex: 1 1 0; min-width: 0; }
+.cal-col--today { flex: 0 0 244px; }
+.cal-col--weekend { flex: 0 0 100px; }
+
+.cal-dayhead__date {
+  padding: 4px 4px 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  white-space: nowrap;
+}
+.cal-dayhead__num {
+  font-size: var(--vkui--font_title1--font_size--compact);
+  line-height: var(--vkui--font_title1--line_height--compact);
+  font-weight: var(--vkui--font_title1--font_weight--compact);
+  color: var(--vkui--color_text_primary);
+}
+.cal-dayhead__wd {
+  padding: 2px 0;
+  font-size: var(--vkui--font_caption1_caps--font_size--compact);
+  line-height: 16px;
+  font-weight: var(--vkui--font_caption1_caps--font_weight--compact);
+  letter-spacing: 0.26px;
+  text-transform: uppercase;
+  color: var(--vkui--color_text_secondary);
+}
+.cal-dayhead.is-past .cal-dayhead__num { color: var(--vkui--color_text_secondary); }
+.cal-dayhead.is-today .cal-dayhead__num,
+.cal-dayhead.is-today .cal-dayhead__wd { color: var(--vkui--color_text_accent); }
+
+.cal-allday {
+  height: 28px;
+  padding: 4px 12px 4px 4px;
+  display: flex;
+  gap: 2px;
+  background: var(--vkui--color_background_content);
+  box-shadow: inset 0 -0.5px 0 var(--cal-line);
+}
+.cal-week__gutter + .cal-dayhead .cal-allday { border-top-left-radius: 16px; }
+.cal-dayhead:last-child .cal-allday { border-top-right-radius: 16px; }
+.cal-allday__ev, .cal-allday__more {
+  height: 20px;
+  border-radius: 8px;
+  background: var(--ev-bg);
+  color: var(--ev-text);
+  font-size: var(--vkui--calendar_font_text_event--font_size--compact);
+  line-height: 20px;
+  font-weight: var(--vkui--calendar_font_text_event--font_weight--compact);
+  white-space: nowrap;
+}
+.cal-allday__ev { flex: 1; min-width: 0; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; }
+.cal-allday__more { flex: none; min-width: 20px; text-align: center; }
+.cal-allday__ev.is-past, .cal-allday__more.is-past { background: var(--ev-tint); }
+
+.cal-week__body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.cal-week__body::-webkit-scrollbar { display: none; }
+.cal-week__inner { position: relative; display: flex; height: calc(24 * var(--cal-hour)); }
+
+.cal-timeline { position: relative; }
+.cal-timeline__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: var(--vkui--font_caption1--font_size--compact);
+  line-height: var(--vkui--font_caption1--line_height--compact);
+  font-weight: var(--vkui--font_caption1--font_weight--compact);
+  color: var(--vkui--color_text_primary);
+  pointer-events: none;
+}
+
+.cal-col {
+  position: relative;
+  background-color: var(--vkui--color_background_content);
+  background-image:
+    linear-gradient(to left, var(--cal-line) 0.5px, transparent 0.5px),
+    linear-gradient(to bottom, var(--cal-line) 0.5px, transparent 0.5px);
+  background-size: 100% 100%, 100% var(--cal-hour);
+}
+.cal-col--weekend {
+  background-image:
+    linear-gradient(to left, var(--cal-line) 0.5px, transparent 0.5px),
+    linear-gradient(to bottom, var(--cal-line) 0.5px, transparent 0.5px),
+    linear-gradient(var(--vkui--calendar_color_background_positive_tint_alpha4), var(--vkui--calendar_color_background_positive_tint_alpha4));
+  background-size: 100% 100%, 100% var(--cal-hour), 100% 100%;
+}
+
+/* линия «сейчас» */
+.cal-now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 3;
+  background: var(--vkui--color_background_accent);
+  pointer-events: none;
+}
+.cal-now::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--vkui--color_background_accent);
+}
+
+/* ---------- событие ---------- */
+.ev-wrap {
+  position: absolute;
+  left: 2px;
+  right: 13px;
+  z-index: 1;
+  display: flex;
+  gap: 2px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+/* зоны растягивания за верхний и нижний край */
+.ev-wrap::before, .ev-wrap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  z-index: 2;
+  cursor: ns-resize;
+}
+.ev-wrap::before { top: 0; }
+.ev-wrap::after { bottom: 0; }
+.ev-wrap:has(.ev--small)::before, .ev-wrap:has(.ev--small)::after { display: none; }
+.ev__mark { flex: none; width: 2px; border-radius: 4px; background: var(--ev-solid); }
+
+.ev {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--ev-bg);
+  color: var(--ev-text);
+  font-size: var(--vkui--calendar_font_text_event--font_size--compact);
+  line-height: var(--vkui--calendar_font_text_event--line_height--compact);
+  font-weight: var(--vkui--calendar_font_text_event--font_weight--compact);
+}
+.ev__title { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.ev__title--line { display: block; white-space: nowrap; text-overflow: ellipsis; }
+.ev__time { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.ev__time > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ev__icons { flex: none; display: flex; gap: 4px; }
+
+/* 15 минут */
+.ev--small {
+  padding: 0 4px;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: var(--vkui--calendar_font_text_event_small--font_size--compact);
+  line-height: var(--vkui--calendar_font_text_event_small--line_height--compact);
+  font-weight: 500;
+}
+/* прошедший день */
+.ev--past { background: var(--ev-tint); }
+/* не подтвердил участие — пунктир */
+.ev--invite {
+  padding: 3px;
+  border: 1px dashed var(--vkui--color_field_border_alpha);
+  background: var(--vkui--color_background_content);
+}
+/* «возможно приду» — штриховка */
+.ev--maybe {
+  padding: 3px;
+  border: 1px dashed var(--ev-solid);
+  background:
+    repeating-linear-gradient(135deg, var(--ev-solid) 0 1.5px, transparent 1.5px 5.5px),
+    var(--vkui--color_background_content);
+}
+.ev--small.ev--invite, .ev--small.ev--maybe { padding: 0 3px; }
+/* открыто или его тянут */
+.ev--active { box-shadow: var(--cal-elev-event); }
+.ev-wrap:has(.ev--active) { z-index: 2; }
+.ev-wrap:has(.is-moving) { cursor: grabbing; }
+.ev-wrap:has(.is-resizing) { cursor: ns-resize; }
+
+/* куда встанет событие при переносе и растягивании */
+.ev-ghost {
+  position: absolute;
+  left: 2px;
+  right: 13px;
+  z-index: 0;
+  border-radius: 8px;
+  background: var(--ev-tint);
+  pointer-events: none;
+}
+.ev-ghost-ui { position: absolute; left: 2px; right: 13px; z-index: 4; pointer-events: none; }
+.ev-ghost__handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ev-solid);
+  border-radius: 50%;
+  background: var(--vkui--color_background_content);
+}
+.ev-ghost__handle--bottom { right: 28px; bottom: -5px; }
+.ev-ghost__handle--top { left: 28px; top: -5px; }
+.cal-tip {
+  position: absolute;
+  left: 0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  background: var(--vkui--color_background_content);
+  box-shadow: var(--vkui--elevation2);
+  font-size: var(--vkui--font_footnote--font_size--compact);
+  line-height: var(--vkui--font_footnote--line_height--compact);
+  font-weight: var(--vkui--font_footnote--font_weight--compact);
+  color: var(--vkui--color_text_primary);
+}
+.cal-tip--bottom { top: calc(100% + 7px); }
+.cal-tip--top { bottom: calc(100% + 7px); }
