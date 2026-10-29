@@ -43,15 +43,7 @@ html.cal-page, html.cal-page body { margin: 0; padding: 0; height: 100%; overflo
   background: var(--cal-nav-bg);
   color: var(--vkui--color_icon_contrast);
 }
-.cal-nav__logo {
-  width: 32px;
-  height: 32px;
-  margin: 4px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  background: var(--vkui--color_background_accent);
-}
+.cal-nav__logo { display: block; flex: none; width: 32px; height: 32px; margin: 4px; }
 .cal-nav__list { display: flex; flex-direction: column; gap: 4px; }
 .cal-nav__item {
   width: 40px;

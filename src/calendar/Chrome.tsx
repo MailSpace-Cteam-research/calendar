@@ -3,13 +3,16 @@
 import { Avatar, Tappable } from '@vkontakte/vkui';
 import {
   Icon16Chevron, Icon16ChevronLeft, Icon20Add, Icon20CheckBoxOn, Icon20ChevronLeftOutline, Icon20ChevronRight2,
-  Icon20ChevronRightOutline, Icon20Dropdown, Icon20GearOutline, Icon20LogoVkWorkspaceOutline, Icon20PrinterOutline,
+  Icon20ChevronRightOutline, Icon20Dropdown, Icon20GearOutline, Icon20PrinterOutline,
   Icon24CalendarOutline, Icon24CheckSquareOutline, Icon24CloudOutline, Icon24DocumentOutline, Icon24HomeOutline,
   Icon24ListBulletSquareOutline, Icon24MailOutline, Icon24MessageOutline, Icon24PhoneOutline, Icon24PollOutline,
   Icon24ScribblePencilRectangleOutline, Icon24SearchStarsOutline, Icon24ServicesOutline, Icon24StarsOutline,
   Icon24UsersOutline,
 } from '@vkontakte/icons';
 import { MONTH, WEEK } from './weekData';
+// логотип и аватар — файлы от владельца прототипа, не иконки VK Icons
+import logo from './assets/vk-ws-logo.svg';
+import avatar from './assets/avatar.webp';
 
 const SERVICES = [
   ['Главная', Icon24HomeOutline], ['Мессенджер', Icon24MessageOutline], ['Почта', Icon24MailOutline],
@@ -22,7 +25,7 @@ const SERVICES = [
 export function NavBar() {
   return (
     <nav className="cal-nav">
-      <div className="cal-nav__logo"><Icon20LogoVkWorkspaceOutline /></div>
+      <img className="cal-nav__logo" src={logo} width={32} height={32} alt="VK WorkSpace" />
       <div className="cal-nav__list">
         {SERVICES.map(([name, Icon]) => (
           <Tappable key={name} className={'cal-nav__item' + (name === 'Календарь' ? ' is-active' : '')} aria-label={name}>
@@ -31,7 +34,7 @@ export function NavBar() {
         ))}
       </div>
       <div className="cal-nav__bottom">
-        <div className="cal-nav__profile"><Avatar size={32} initials="СЗ" gradientColor="blue" /></div>
+        <div className="cal-nav__profile"><Avatar size={32} src={avatar} alt="Профиль" /></div>
         <Tappable className="cal-nav__item" aria-label="Развернуть"><Icon20ChevronRight2 /></Tappable>
       </div>
     </nav>
