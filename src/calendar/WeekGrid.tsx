@@ -12,8 +12,8 @@ type Drag = { id: string; mode: Mode; x0: number; y0: number; orig: CalEvent; da
 
 export type SlotInfo = { day: number; h: number };
 
-/** Отступы события внутри колонки по макету: 2px сверху/слева/снизу, 13px справа */
-const INSET = { top: 2, left: 2, right: 13, v: 4 };
+/** Отступы события внутри колонки по макету: 2px сверху и слева, 13px справа; снизу 2px у часовых и длиннее, 0 у коротких */
+const INSET = { top: 2, left: 2, right: 13 };
 const EDGE = 6;
 
 const colorVars = (c: EventColor): CSSProperties => ({
@@ -23,7 +23,8 @@ const colorVars = (c: EventColor): CSSProperties => ({
   ['--ev-tint' as string]: `var(--vkui--calendar_color_background_${c}_tint)`,
 });
 
-const evHeight = (s: number, e: number) => Math.max((e - s) * HOUR - INSET.v, 12);
+// по макету: 60 мин — 52px, 30 мин — 26px, 15 мин — 12px
+const evHeight = (s: number, e: number) => (e - s) * HOUR - (e - s >= 1 ? 4 : 2);
 
 function EventBody({ ev, h }: { ev: CalEvent; h: number }) {
   const icons = (ev.attach || ev.call) && (

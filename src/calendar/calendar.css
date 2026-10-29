@@ -4,11 +4,14 @@
   --cal-bg: #f6f7fb;           /* фон страницы из макета; в теме calendar --vkui--color_background белый */
   --cal-nav-bg: #27303b;       /* Other/SuperappMenuBackground */
   --cal-line: var(--vkui--color_field_border_alpha);
+  /* линии сетки в макете 0.5px; на обычном экране рисуем 1px вполовину прозрачнее — так выглядит и в Figma */
+  --cal-grid-line: color-mix(in srgb, var(--vkui--color_field_border_alpha) 50%, transparent);
   --cal-elev-event: 0 4px 12px 0 rgba(0, 16, 61, 0.04), 0 4px 40px 0 rgba(0, 16, 61, 0.12); /* calendarElevationEventWeek */
   --cal-hour: 56px;
 
-  position: fixed;
-  inset: 0;
+  /* не fixed: AppRoot VKUI задаёт контейнер, внутри которого fixed схлопывается */
+  width: 100vw;
+  height: 100vh;
   display: flex;
   overflow: hidden;
   background: var(--cal-bg);
@@ -17,6 +20,8 @@
   -webkit-font-smoothing: antialiased;
 }
 .cal * { box-sizing: border-box; }
+/* экран календаря занимает всё окно: снимаем отступы страницы концепта */
+html.cal-page, html.cal-page body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 
 /* типографика из макета → токены compact */
 .cal-compose, .cal-month__title, .cal-group__title, .cal-side__btn, .cal-btn, .cal-gridnav__title {
@@ -246,7 +251,7 @@
   display: flex;
   gap: 2px;
   background: var(--vkui--color_background_content);
-  box-shadow: inset 0 -0.5px 0 var(--cal-line);
+  box-shadow: inset 0 -1px 0 var(--cal-grid-line);
 }
 .cal-week__gutter + .cal-dayhead .cal-allday { border-top-left-radius: 16px; }
 .cal-dayhead:last-child .cal-allday { border-top-right-radius: 16px; }
@@ -285,14 +290,14 @@
   position: relative;
   background-color: var(--vkui--color_background_content);
   background-image:
-    linear-gradient(to left, var(--cal-line) 0.5px, transparent 0.5px),
-    linear-gradient(to bottom, var(--cal-line) 0.5px, transparent 0.5px);
+    linear-gradient(to left, var(--cal-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--cal-grid-line) 1px, transparent 1px);
   background-size: 100% 100%, 100% var(--cal-hour);
 }
-.cal-col--weekend {
+.cal-col.cal-col--weekend {
   background-image:
-    linear-gradient(to left, var(--cal-line) 0.5px, transparent 0.5px),
-    linear-gradient(to bottom, var(--cal-line) 0.5px, transparent 0.5px),
+    linear-gradient(to left, var(--cal-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--cal-grid-line) 1px, transparent 1px),
     linear-gradient(var(--vkui--calendar_color_background_positive_tint_alpha4), var(--vkui--calendar_color_background_positive_tint_alpha4));
   background-size: 100% 100%, 100% var(--cal-hour), 100% 100%;
 }
