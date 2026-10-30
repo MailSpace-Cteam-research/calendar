@@ -377,3 +377,6 @@
 .fg-room-portal .fg-room-option { min-height: 48px; height: 48px; gap: 0 !important; padding: 6px 12px !important; }
 .fg-room-portal .fg-room-option > span { display: block; min-height: 18px; line-height: 18px; }
 .fg-room-portal .fg-room-option > small { display: block; min-height: 16px; line-height: 16px; }
+/* A portal is outside .fg-page; restore its border-box reset and calendar-theme variables. */
+.fg-room-portal, .fg-room-portal * { box-sizing: border-box; }
+.fg-room-portal { --fg-muted: var(--vkui--color_text_secondary); --fg-text: var(--vkui--color_text_primary); --fg-subtle: var(--vkui--color_background_secondary_alpha); font-size: 13px; line-height: 18px; }
