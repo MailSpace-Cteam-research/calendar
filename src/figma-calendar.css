@@ -258,3 +258,34 @@
   .fg-event-form.fg-mode-ai-done.fg-participants-expanded .fg-card-inner { min-height:0; overflow-y:auto; scrollbar-width:thin; }
   .fg-demo-buttons .fg-example-prompts { flex-wrap:wrap; }
 }
+
+/* UI audit pass 2: VKUI 8 generated class names. */
+.fg-wait-skeleton .fg-wait-title > span:not(.fg-event-dot) {
+  flex:1 1 auto; min-width:0; padding-left:12px;
+  font-family:var(--vkui--font_family_base); font-size:24px; font-weight:500;
+  line-height:28px; color:var(--fg-muted); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.fg-title-multiline > .vkuiFormField__border,
+.fg-description > .vkuiFormField__border,
+.fg-ai-text > .vkuiFormField__border { display:none!important; }
+.fg-title-multiline, .fg-description, .fg-ai-text {
+  background:transparent!important; border:0!important; box-shadow:none!important;
+}
+.fg-title-multiline textarea, .fg-description textarea, .fg-ai-text textarea {
+  background:transparent!important; border:0!important; box-shadow:none!important; outline:none;
+}
+.fg-mode-ai-done .fg-ai-success button,
+.fg-mode-ai-done .fg-ai-success button .vkuiIcon { color:var(--fg-icon)!important; }
+.fg-form-footer .fg-save { width:110px; min-width:110px; max-width:110px; padding-inline:10px!important; }
+.fg-form-footer .fg-save .vkuiButton__content { width:auto; overflow:visible; white-space:nowrap; }
+.fg-mode-ai-done .fg-form-title.fg-title-multiline .vkuiFormField__scrollContainer,
+.fg-description .vkuiFormField__scrollContainer { border:0!important; }
+/* Figma attachment action 36px circle. */
+.fg-mode-ai-compose .fg-ai-bottom > button:first-child {
+  width:36px; min-width:36px; height:36px; border-radius:50%;
+  background:var(--fg-subtle); color:var(--fg-text);
+}
+.fg-mode-ai-compose .fg-ai-bottom > button:first-child:hover {
+  background:var(--vkui--color_transparent--hover,rgba(0,16,61,.08));
+}
