@@ -388,3 +388,5 @@ body {
   .form.pop .design-content { padding-left: 16px; }
   .form.pop .design-footer { padding-left: 16px; padding-right: 16px; }
 }
+
+.form.pop .design-notice { margin: 8px 0 4px 32px; padding: 8px 10px; border-radius: 8px; background: rgba(0,16,61,.04); color: #626a73; font: 400 13px/18px var(--vkui--font_family_base, Arial, sans-serif); }
