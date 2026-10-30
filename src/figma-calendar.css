@@ -289,3 +289,6 @@
 .fg-mode-ai-compose .fg-ai-bottom > button:first-child:hover {
   background:var(--vkui--color_transparent--hover,rgba(0,16,61,.08));
 }
+
+/* Ensure 810px expanded AI form fits within the 820px Figma calendar frame. */
+.fg-event-form.fg-mode-ai-done.fg-participants-expanded { top:-8px; }
