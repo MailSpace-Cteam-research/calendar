@@ -265,3 +265,81 @@
   .fg-mode-ai-done.fg-participants-expanded .fg-card-inner { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
   .fg-demo-buttons .fg-example-prompts { flex-wrap: wrap; }
 }
+
+/* Figma Решение 100:63377 — refinements only; base calendar & earlier reference states unchanged. */
+.fg-event-form {
+  transition: height 240ms cubic-bezier(.2,.8,.2,1), top 240ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease;
+  transform-origin: top center;
+}
+.fg-event-form .fg-card-inner { animation: fg-reveal 210ms cubic-bezier(.16,1,.3,1) both; }
+@keyframes fg-reveal { from { opacity: .6; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.fg-event-form .fg-palette, .fg-event-form .fg-cal-menu, .fg-event-form .fg-emoji-menu, .fg-event-form .fg-room-menu {
+  animation: fg-pop 155ms cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes fg-pop { from { opacity: 0; transform: translateY(-5px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.fg-event-form .fg-member-list, .fg-availability-options { animation: fg-reveal 185ms cubic-bezier(.2,.8,.2,1); }
+.fg-event-form .fg-ai-entry:focus-visible, .fg-event-form button:focus-visible, .fg-event-form input:focus-visible, .fg-event-form textarea:focus-visible {
+  outline: 2px solid var(--vkui--color_stroke_accent); outline-offset: 2px;
+}
+.fg-emoji-anchor { position: relative; width: 36px; flex: 0 0 36px; }
+.fg-emoji-menu { display: grid; grid-template-columns: repeat(4,36px); gap: 4px; background: var(--fg-content); position: absolute; top: 38px; left: 0; z-index: 110; border: 1px solid var(--fg-border); box-shadow: 0 10px 25px rgba(0,16,61,.15); padding: 8px; border-radius: 12px; }
+.fg-emoji-menu .vkuiTappable { width: 36px; height: 36px; display: grid; place-items: center; padding: 0 !important; border-radius: 8px; }
+.fg-event-emoji { font-size: 20px; line-height: 20px; }
+.fg-field-error { color: var(--vkui--color_text_negative); font-size: 12px; line-height: 16px; margin: 2px 0 5px 32px; }
+.fg-mode-ai-applied { min-height: 614px; height: 614px; }
+.fg-mode-ai-applied .fg-card-inner { height: 566px; display: flex; flex-direction: column; }
+.fg-mode-ai-applied .fg-event-content { min-height: 0; height: 100%; flex: 1; }
+.fg-mode-ai-applied .fg-form-heading { height: 98px; flex: 0 0 98px; min-height: 98px; align-items: flex-start; }
+.fg-mode-ai-applied .fg-palette-anchor { align-self: flex-start; margin-top: 5px; }
+.fg-mode-ai-applied .fg-form-fields { flex: 1 1 auto; min-height: 0; }
+.fg-mode-ai-applied .fg-form-pills { height: 90px; min-height: 90px; }
+.fg-mode-ai-applied .fg-form-footer { height: 80px; flex: 0 0 80px; }
+.fg-mode-ai-applied .fg-title-multiline textarea { min-height: 64px; }
+.fg-mode-ai-applied.fg-participants-expanded { height: 776px; top: 12px; }
+.fg-mode-ai-applied.fg-participants-expanded .fg-card-inner { height: 728px; }
+/* Slot suggestions are present when real participants exist and never lock the form. */
+.fg-free-slots { margin: 2px 0 6px 32px; font-size: 12px; line-height: 18px; }
+.fg-availability-toggle { display: flex !important; align-items: baseline; justify-content: space-between; width: 100%; min-height: 28px; padding: 6px 0 !important; border-radius: 8px !important; text-align: left; }
+.fg-availability-toggle span { color: var(--fg-accent); }
+.fg-availability-options { display: flex; flex-wrap: wrap; gap: 6px; max-width: 100%; margin-bottom: 2px; }
+.fg-availability-options .fg-availability-pill { border-radius: 25px; min-height: 28px; height: 28px; padding: 0 10px; font-weight: 400; color: var(--fg-text); background: var(--fg-subtle); }
+.fg-mode-ai-applied.fg-with-slots { height: auto; min-height: 694px; max-height: 792px; top: 14px; overflow-y: auto; overflow-x: visible; scrollbar-width: thin; }
+.fg-mode-ai-applied.fg-with-slots .fg-card-inner { height: auto; min-height: 646px; }
+.fg-mode-ai-applied.fg-with-slots .fg-form-fields { flex: auto; }
+.fg-mode-ai-applied.fg-with-slots.fg-participants-expanded { max-height: 792px; }
+.fg-room-row { position: relative; }
+.fg-room-anchor { flex: 1; min-width: 0; position: relative; }
+.fg-room-button { height: 36px; width: 100%; display: flex !important; justify-content: flex-start; text-align: left; padding-left: 0; color: var(--fg-text); }
+.fg-room-button .vkuiButton__content { max-width: 235px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fg-room-menu { position: absolute; top: 38px; left: 0; width: 290px; max-height: 286px; overflow-y: auto; z-index: 120; border-radius: 14px; background: var(--fg-content); box-shadow: 0 6px 26px rgba(0,16,61,.19); padding: 6px; }
+.fg-room-option { display: flex !important; flex-direction: column; align-items: flex-start; padding: 8px 12px !important; min-height: 44px; border-radius: 10px !important; font-size: 13px; line-height: 18px; }
+.fg-room-option[aria-selected=true] { background: var(--fg-subtle); }
+.fg-room-option small { font-size: 12px; line-height: 16px; color: var(--fg-muted); }
+.fg-room-option .fg-room-free { color: var(--vkui--color_text_positive); }
+.fg-room-option .fg-room-busy { color: var(--fg-muted); }
+.fg-ai-result-head { flex: 1; height: 36px; min-width: 0; display: flex; align-items: center; gap: 4px; }
+.fg-ai-result-apply { flex: 1; height: 36px; display: flex !important; align-items: center; padding: 8px 0 8px 24px !important; gap: 12px; color: var(--fg-text); }
+.fg-ai-result-apply .vkuiIcon { color: var(--fg-icon); }
+.fg-ai-result-head > .vkuiButton { min-width: 0; flex: none; color: var(--fg-muted); }
+.fg-mode-ai-applied .fg-ai-entry, .fg-mode-ai-applied .fg-ai-entry span { color: var(--fg-accent) !important; }
+.fg-mode-ai-applied .fg-member-item, .fg-mode-ai-applied .fg-member-preview { font-weight: 400; }
+.fg-mode-ai-applied .fg-member-content .vkuiButton { font-weight: 400; }
+.fg-toast { animation: fg-toast-in 200ms cubic-bezier(.2,.8,.2,1); }
+@keyframes fg-toast-in { from { opacity: 0; transform: translate(-50%,10px); } to { opacity: 1; transform: translate(-50%,0); } }
+@media (prefers-reduced-motion: reduce) {
+  .fg-event-form, .fg-event-form *, .fg-event-form *::before, .fg-event-form *::after, .fg-toast { animation: none !important; transition: none !important; }
+}
+@media (max-width: 600px) {
+  .fg-room-menu { max-width: calc(100vw - 60px); }
+  .fg-mode-ai-applied.fg-participants-expanded, .fg-mode-ai-applied.fg-with-slots { max-height: calc(100vh - 28px); overflow-y: auto; }
+}
+
+/* Popovers must not be cut at the rounded content-card boundary. */
+.fg-mode-ai-applied .fg-card-inner, .fg-mode-event .fg-card-inner { overflow: visible; }
+.fg-mode-ai-applied.fg-with-slots:not(.fg-participants-expanded) { overflow: visible; max-height: none; }
+.fg-mode-ai-applied.fg-with-slots:not(.fg-participants-expanded) .fg-card-inner { border-radius: 18px; }
+.fg-mode-ai-applied .fg-form-heading .fg-emoji-anchor { margin-top: 0; }
+.fg-availability-toggle { color: var(--fg-text); font-size: 12px; }
+.fg-availability-toggle:not([aria-expanded=true]) { color: var(--fg-muted); }
+.fg-mode-ai-applied .fg-room-anchor { z-index: 5; }
+.fg-mode-ai-applied .fg-room-menu { z-index: 180; }
