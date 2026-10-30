@@ -193,3 +193,14 @@
 .fg-mode-ai-done .fg-form-heading {height:auto;min-height:98px;align-items:flex-start;}
 .fg-mode-ai-done .fg-palette-anchor {align-self:flex-start;margin-top:5px;}
 .fg-form-title.fg-title-multiline textarea {width:100%;min-height:64px;height:64px;border:0;background:transparent;padding:4px 12px!important;font-size:24px;font-weight:500;line-height:28px;resize:none;outline:none;}
+
+/* VKUI Button internal gutters must not shrink Figma's 103/97/122/98/146 pill labels. */
+.fg-form-pills .fg-pill .vkuiButton__in {gap:6px;width:100%;justify-content:center;}
+.fg-form-pills .fg-pill .vkuiButton__before {padding:0!important;flex:0 0 20px;}
+.fg-form-pills .fg-pill .vkuiButton__content {padding:0!important;flex:0 0 auto;width:auto;overflow:visible;text-overflow:clip;white-space:nowrap;}
+.fg-form-footer .fg-save {width:110px;min-width:110px;padding-inline:10px;}
+.fg-form-footer .fg-save .vkuiButton__content {padding:0!important;overflow:visible;}
+.fg-form-footer .fg-cal-button {width:153px;min-width:153px;padding-inline:8px;}
+.fg-title-multiline .vkuiFormField__border, .fg-description .vkuiFormField__border {display:none;}
+.fg-title-multiline, .fg-description {background:transparent;}
+.fg-title-multiline .vkuiTextarea__el, .fg-description .vkuiTextarea__el {background:transparent;}
