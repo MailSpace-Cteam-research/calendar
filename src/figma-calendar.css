@@ -18,7 +18,7 @@
 .fg-frame-scroll { width: 100%; max-width: 1366px; margin: 0 auto; overflow-x: auto; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,16,61,.12); }
 .fg-frame { display: grid; grid-template-columns: 60px 1306px; width: 1366px; height: 820px; overflow: hidden; background: var(--fg-bg); position: relative; }
 /* VK WorkSpace service rail */
-.fg-nav { display: flex; flex-direction: column; align-items: center; background: var(--vkui--color_background_contrast, #27303b); padding: 10px; gap: 4px; color: var(--vkui--color_text_contrast, white); }
+.fg-nav { display: flex; flex-direction: column; align-items: center; background: var(--vkui--color_background_contrast_inverse); padding: 10px; gap: 4px; color: var(--vkui--color_text_contrast, white); }
 .fg-nav-logo { flex: none; width: 40px; height: 44px; display: grid; place-items: start center; }
 .fg-workspace-symbol { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: var(--fg-accent); color: var(--vkui--color_text_contrast); }
 .fg-nav .fg-nav-button { min-width: 40px; max-width: 40px; height: 40px; flex: 0 0 40px; border-radius: 10px; color: var(--vkui--color_icon_contrast, white); }
@@ -75,7 +75,7 @@
 .fg-event-form { position: absolute; top: 54px; left: 336px; z-index: 25; width: 420px; display: flex; flex-direction: column; gap: 6px; padding: 6px; border-radius: 24px; background: color-mix(in srgb,var(--fg-content) 80%,transparent); box-shadow: 0 12px 40px rgba(0,16,61,.12); backdrop-filter: blur(24px); }
 .fg-event-head { width: 408px; height: 36px; flex: 0 0 36px; display: flex; position: relative; gap: 8px; align-items: center; padding-right: 8px; }
 .fg-ai-entry { flex: 1 1 auto; display: flex !important; align-items: center; gap: 12px; padding: 8px 0 8px 32px !important; height: 36px; border-radius: 18px !important; color: var(--fg-accent); }
-.fg-ai-entry span { font-size: 15px; line-height: 20px; white-space: nowrap; background-image: linear-gradient(9deg,var(--fg-accent),var(--vkui--color_text_accent_themed,var(--fg-accent))); color: var(--fg-accent); }
+.fg-ai-entry > span:not(.vkuiTappable__stateLayer) { font-size: 15px; line-height: 20px; white-space: nowrap; color: var(--fg-accent); }
 .fg-event-head .fg-form-close { flex: 0 0 36px; height: 36px; color: var(--fg-icon); }
 .fg-ai-back { color: var(--fg-muted); }
 .fg-ai-back span { color: var(--fg-muted); }
@@ -180,3 +180,16 @@
 .fg-mode-ai-done .fg-event-form { max-height: 754px; }
 .fg-toast { position: fixed; z-index: 10000; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--vkui--color_background_contrast); color: var(--vkui--color_text_contrast); padding: 12px 16px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,16,61,.2); }
 @media (max-width: 600px) { .fg-page { padding: 8px 0; } .fg-frame-scroll { border-radius: 0; } .fg-demo-tools { padding: 4px 12px; align-items: flex-start; flex-direction: column; } }
+/* Figma's measured 103/97/122 + 98/146 layout */
+.fg-mode-event .fg-form-pills,.fg-mode-ai-compose .fg-form-pills,.fg-mode-ai-wait .fg-form-pills {height:90px;min-height:90px;}
+.fg-form-pills .fg-pill:nth-child(1) {width:103px;min-width:103px;}
+.fg-form-pills .fg-pill:nth-child(2) {width:97px;min-width:97px;}
+.fg-form-pills .fg-pill:nth-child(3) {width:122px;min-width:122px;}
+.fg-form-pills .fg-pill:nth-child(4) {width:98px;min-width:98px;}
+.fg-form-pills .fg-pill:nth-child(5) {width:146px;min-width:146px;}
+.fg-form-pills .fg-pill {gap:0;}
+.fg-form-pills .fg-pill .vkuiButton__content {width:100%;justify-content:center;gap:6px;font-size:15px;white-space:nowrap;}
+.fg-waiting {min-height:286px;}
+.fg-mode-ai-done .fg-form-heading {height:auto;min-height:98px;align-items:flex-start;}
+.fg-mode-ai-done .fg-palette-anchor {align-self:flex-start;margin-top:5px;}
+.fg-form-title.fg-title-multiline textarea {width:100%;min-height:64px;height:64px;border:0;background:transparent;padding:4px 12px!important;font-size:24px;font-weight:500;line-height:28px;resize:none;outline:none;}
