@@ -292,3 +292,14 @@ body:has(.figma-mode) { padding: 0; }
 .wrap.figma-mode .week { width: 100%; }
 .wrap.figma-mode .tcol { background: var(--vkui--color_background_content); }
 .wrap.figma-mode .tcol span { font-size: 12px; }
+
+/* Figma form geometric normalization: VKUI subcomponents otherwise add content-box paddings. */
+.figma-event-form, .figma-event-form * { box-sizing: border-box; }
+.figma-event-form .figma-ai-head { height: 36px; flex: 0 0 36px; }
+.figma-event-form .figma-ai-action { height: 36px; }
+.figma-event-form .figma-extra-pills { height: 90px; min-height: 90px; gap: 6px; align-content: flex-start; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(1) { width: 103px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(2) { width: 97px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(3) { width: 122px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(4) { width: 98px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(5) { width: 146px; }
