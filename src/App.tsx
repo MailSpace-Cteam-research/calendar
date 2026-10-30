@@ -3,7 +3,11 @@ import {
   Button, Card, Checkbox, ContentBadge, Footnote, Headline, IconButton, SegmentedControl,
   SimpleCell, Snackbar, Text, Title,
 } from '@vkontakte/vkui';
-import { Icon20ChevronLeftOutline, Icon20ChevronRightOutline } from '@vkontakte/icons';
+import {
+  Icon20ChevronLeftOutline, Icon20ChevronRightOutline, Icon20CalendarOutline, Icon20UsersOutline,
+  Icon20ClockOutline, Icon20ArticleBoxOutline, Icon20BuildingOutline, Icon20Attach,
+  Icon20NotificationOutline, Icon20VideocamOutline, Icon20PollOutline, Icon20SmileOutline,
+} from '@vkontakte/icons';
 import {
   ANNA0, DAYS, EXT, OLEG, OWN0, POOL, ROOMS, fmt, newForm, pickRoom, shouldGrow, slots,
   type Ev, type Form,
@@ -19,6 +23,7 @@ type St = {
 };
 
 const PRESETS: Record<string, { t: string; cap: React.ReactNode }> = {
+  figma: { t: 'Figma · Неделя + форма', cap: <>Эталон: календарь <b>96:41371</b> с открытой формой <b>96:39656</b>. Форма, иконки и состояния собраны из VKUI; этот сценарий не заменяет остальные сценарии пульта.</> },
   free: { t: 'Свободно', cap: <><b>Попробуйте сами.</b> Кликните в пустую клетку недели — появится короткий поповер. Добавьте участников, переговорку или повтор и посмотрите, как форма растёт.</> },
   s1: { t: 'S1 · Для себя', cap: <><b>Для себя — три строки.</b><ul><li>Название, время с длительностью и ряд «+ добавить». Ни одного пустого поля-плейсхолдера.</li><li>Кнопки занятости нет: подбирать не для кого.</li><li>Длительность — кнопка: нажмите «1 ч».</li></ul></> },
   s2: { t: 'S2 · Встреча на троих', cap: <><b>С первым участником время становится выбором.</b><ul><li>Петя занят в 15:00 — это сказано словами, а не красной ошибкой.</li><li>Под временем три слота, когда свободны все. Наведите на слот — он подсветится на неделе; нажмите — событие переедет. Или перетащите сам блок.</li><li>Подсказки людей появляются, только когда вы в поле участников.</li></ul></> },
@@ -42,6 +47,7 @@ const DECISIONS: [string, string, string][] = [
 
 function presetState(k: string, prev: St): St {
   const base: St = { ...prev, preset: k, view: 'week', toast: null, part: null, ans: null, saved: null, own: OWN0.map((x) => ({ ...x })), anna: ANNA0.map((x) => ({ ...x })), lastSent: null, delegated: false };
+  if (k === 'figma') base.form = newForm(1, 10, { title: '', people: [], ext: [], call: false });
   if (k === 'free') base.form = null;
   if (k === 's1') base.form = newForm(4, 16, { title: 'Записаться к стоматологу' });
   if (k === 's2') base.form = newForm(2, 15, { title: 'Синк по онбордингу', people: ['Маша', 'Петя'], call: true });
@@ -53,7 +59,7 @@ function presetState(k: string, prev: St): St {
 }
 
 export default function App() {
-  const [s, setS] = useState<St>(() => presetState('s2', { growRule: 'logistics' } as St));
+  const [s, setS] = useState<St>(() => presetState('figma', { growRule: 'logistics' } as St));
   const [hover, setHover] = useState<number | null>(null);
   const flipFrom = useRef<DOMRect | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
@@ -138,7 +144,7 @@ export default function App() {
   });
 
   return (
-    <div className="wrap">
+    <div className={'wrap' + (s.preset === 'figma' ? ' figma-mode' : '')}>
       <header className="hdr">
         <Title level="1" weight="1" Component="h1">Концепт формы события</Title>
         <Text className="muted lead">Встреча собирается вокруг людей, а не полей. Для себя — короткий поповер. С первым участником под временем появляются свободные слоты. Когда встреча становится большой, форма сама вырастает в сайдбар, а занятость ложится на вашу же неделю. Всё необязательное — блоки со строкой-резюме. Собрано на VKUI и VK Icons, тема Календаря. Данные выдуманы, «сейчас» — среда, 15 апреля, 13:20.</Text>
@@ -164,15 +170,30 @@ export default function App() {
 
       <div className="frame">
         <div className="app">
-          <nav className="nav" aria-hidden><span className="logo" /><i /><i /><i className="on" /><i /><i /><i /></nav>
+          <nav className="nav" aria-label="Навигация">
+            {s.preset === 'figma' ? <>
+              <IconButton className="nav-logo" label="VK WorkSpace"><Icon20CalendarOutline /></IconButton>
+              <IconButton label="Главная"><Icon20ClockOutline /></IconButton>
+              <IconButton label="Сообщения"><Icon20NotificationOutline /></IconButton>
+              <IconButton label="Почта"><Icon20ArticleBoxOutline /></IconButton>
+              <IconButton className="nav-active" label="Календарь"><Icon20CalendarOutline /></IconButton>
+              <IconButton label="Облако"><Icon20Attach /></IconButton>
+              <IconButton label="Документы"><Icon20ArticleBoxOutline /></IconButton>
+              <IconButton label="Задачи"><Icon20PollOutline /></IconButton>
+              <IconButton label="Звонки"><Icon20VideocamOutline /></IconButton>
+              <IconButton label="Сотрудники"><Icon20UsersOutline /></IconButton>
+              <IconButton label="Сервисы"><Icon20BuildingOutline /></IconButton>
+              <IconButton label="Нейропомощник"><Icon20SmileOutline /></IconButton>
+            </> : <><span className="logo" /><i /><i /><i className="on" /><i /><i /><i /></>}
+          </nav>
           <aside className={'left' + (side ? ' hide' : '')}>
             <div><Button size="l" mode="secondary" stretched onClick={() => up((n) => { n.part = null; n.form = newForm(3, 12); n.preset = 'free'; })}>Новое событие</Button></div>
             <div>
-              <Headline level="2" weight="2" className="mmh">Апрель 2026</Headline>
+              <Headline level="2" weight="2" className="mmh">{s.preset === 'figma' ? 'Апрель 2023' : 'Апрель 2026'}</Headline>
               <div className="mm">
                 {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((x) => <span key={x}>{x}</span>)}
                 {[30, 31].map((x) => <span key={'p' + x}>{x}</span>)}
-                {Array.from({ length: 30 }, (_, i) => i + 1).map((x) => <b key={x} className={x === 15 ? 't' : x >= 13 && x <= 17 ? 'w' : ''}>{x}</b>)}
+                {Array.from({ length: 30 }, (_, i) => i + 1).map((x) => <b key={x} className={x === (s.preset === 'figma' ? 7 : 15) ? 't' : x >= (s.preset === 'figma' ? 6 : 13) && x <= (s.preset === 'figma' ? 12 : 17) ? 'w' : ''}>{x}</b>)}
               </div>
             </div>
             <div className="cals">
@@ -191,8 +212,16 @@ export default function App() {
               <Button size="m" mode="secondary">Сегодня</Button>
               <IconButton label="Предыдущая неделя"><Icon20ChevronLeftOutline /></IconButton>
               <IconButton label="Следующая неделя"><Icon20ChevronRightOutline /></IconButton>
-              <Headline level="1" weight="2">13 — 17 апреля 2026</Headline>
+              <Headline level="1" weight="2">{s.preset === 'figma' ? '6 апреля – 12 апреля' : '13 — 17 апреля 2026'}</Headline>
               <span className="sp" />
+              {s.preset === 'figma' && <div className="figma-view-nav" role="group" aria-label="Вид календаря">
+                <Button size="m" mode="tertiary" onClick={() => up((n) => { n.view = 'week'; })}>День</Button>
+                <Button size="m" mode="tertiary" className="selected">Неделя</Button>
+                <Button size="m" mode="tertiary" onClick={() => up((n) => { n.form = null; n.preset = "free"; })}>Месяц</Button>
+                <Button size="m" mode="tertiary" onClick={() => up((n) => { n.form = null; n.preset = "free"; })}>Год</Button>
+                <Button size="m" mode="tertiary" onClick={() => up((n) => { n.view = "week"; })}>Расписание</Button>
+                <Button size="m" mode="tertiary" onClick={() => up((n) => { n.form = newForm(1, 10); })}>Фильтр</Button>
+              </div>}
               {showSeg && <SegmentedControl size="m" className="viewseg" value={s.view} onChange={(v) => up((n) => { n.view = v as St['view']; n.pday = n.form!.d; })}
                 options={[{ value: 'week', label: 'Неделя' }, { value: 'people', label: 'По людям' }]} />}
             </div>
@@ -200,7 +229,7 @@ export default function App() {
               {s.view === 'people' && showSeg && f
                 ? <PeopleView f={f} day={s.pday} cal={ownerCal} onDay={(d) => up((n) => { n.pday = d; })} onPick={(h) => up((n) => { const g = n.form!; g.d = n.pday; g.s = Math.min(h, 18 - g.len); })} />
                 : <>
-                    <Week form={f} part={s.part} events={events} cal={ownerCal} slotList={sl} hover={hover} anna={anna}
+                    <Week figma={s.preset === 'figma'} form={f} part={s.part} events={events} cal={ownerCal} slotList={sl} hover={hover} anna={anna}
                       onCreate={(d, h) => up((n) => { n.part = null; n.form = newForm(d, h); n.preset = 'free'; })}
                       onOutside={() => up((n) => { const g = n.form!; if (g.title || g.people.length || g.ext.length) { n.saved = structuredClone(g); toast(n, `Черновик «${g.title || 'Новое событие'}» сохранён`, 'Вернуть', 'restore'); } n.form = null; n.view = 'week'; })}
                       onMove={(d, h) => up((n) => { if (n.form) { n.form.d = d; n.form.s = h; n.pday = d; } })} />
