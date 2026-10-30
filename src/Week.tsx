@@ -3,18 +3,43 @@ import { useEffect, useRef, useState } from 'react';
 import { Avatar, Footnote, SegmentedControl, Tappable } from '@vkontakte/vkui';
 import { Icon20BuildingOutline } from '@vkontakte/icons';
 import {
-  BUSY, DATES, DAYS, H0, H1, RH, ROOMS, busyNames, fmt, grad, ownerBusy,
+  BUSY, DATES, DAYS, H0, H1, RH, ROOMS, OWN0, busyNames, fmt, grad, ownerBusy,
   type Ev, type Form, type Slot,
 } from './data';
 
 type WeekProps = {
   form: Form | null; part: Ev | null; events: Ev[]; cal: Ev[]; slotList: Slot[]; hover: number | null;
-  onCreate: (d: number, h: number) => void; onOutside: () => void; onMove: (d: number, h: number) => void; anna: boolean;
+  onCreate: (d: number, h: number) => void; onOutside: () => void; onMove: (d: number, h: number) => void; anna: boolean; figma?: boolean;
 };
 
-export function Week({ form: f, part, events, cal, slotList, hover, onCreate, onOutside, onMove, anna }: WeekProps) {
-  const hours: number[] = []; for (let h = H0; h < H1; h++) hours.push(h);
-  const halves: number[] = []; for (let h = H0; h < H1; h += 0.5) halves.push(h);
+const FIGMA_WEEK_EVENTS: Ev[] = [
+  { d: 0, s: 11, e: 11.5, t: 'Еженедельная планёрка' },
+  { d: 0, s: 13, e: 14, t: 'Обсуждение почты' },
+  { d: 0, s: 14, e: 14.5, t: 'Карточка контакта' },
+  { d: 1, s: 10, e: 11, t: 'Обновить документацию' },
+  { d: 1, s: 12, e: 12.5, t: 'Улучшаем NPS нашего сервиса' },
+  { d: 1, s: 13, e: 13.5, t: 'Заметки. Возвращение' },
+  { d: 2, s: 11, e: 11.5, t: 'Обсудить аттачи' },
+  { d: 2, s: 12, e: 14, t: 'Design & Product review Productivity' },
+  { d: 2, s: 14, e: 15, t: 'Подготовить воркшоп', c: 'g' },
+  { d: 2, s: 15, e: 15.5, t: 'Обсуждение почты' },
+  { d: 3, s: 11, e: 12, t: 'Воркшоп Lottie', c: 'g' },
+  { d: 3, s: 12, e: 13, t: 'Задачи' },
+  { d: 4, s: 11, e: 12, t: 'Улучшаем NPS нашего сервиса' },
+  { d: 4, s: 13, e: 14, t: 'Демо Почты' },
+  { d: 4, s: 14, e: 15, t: 'Демо Облака' },
+];
+
+export function Week({ form: f, part, events, cal, slotList, hover, onCreate, onOutside, onMove, anna, figma = false }: WeekProps) {
+  const gridEnd = figma ? 21 : H1;
+  const gridRowHeight = figma ? 56 : RH;
+  const displayDays = figma ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : DAYS;
+  const displayDates = figma ? [6, 7, 8, 9, 10, 11, 12] : DATES;
+  const displayEvents = figma
+    ? [...FIGMA_WEEK_EVENTS, ...events.filter((e) => !OWN0.some((original) => original.t === e.t && original.d === e.d && original.s === e.s))]
+    : events;
+  const hours: number[] = []; for (let h = H0; h < gridEnd; h++) hours.push(h);
+  const halves: number[] = []; for (let h = H0; h < (figma ? H1 : gridEnd); h += 0.5) halves.push(h);
   const side = f && f.mode === 'side';
   const heat = !!(side && f!.people.length >= 6);
   const [drag, setDrag] = useState<{ d: number; h: number } | null>(null);
@@ -25,8 +50,9 @@ export function Week({ form: f, part, events, cal, slotList, hover, onCreate, on
     const move = (e: PointerEvent) => {
       const i = cols.current.findIndex((c) => { if (!c) return false; const r = c.getBoundingClientRect(); return e.clientX >= r.left && e.clientX < r.right; });
       if (i < 0) return;
+      if (i > 4) return;
       const r = cols.current[i]!.getBoundingClientRect();
-      let h = H0 + Math.round(((e.clientY - r.top) / RH - f.len / 2) * 2) / 2;
+      let h = H0 + Math.round(((e.clientY - r.top) / gridRowHeight - f.len / 2) * 2) / 2;
       h = Math.max(H0, Math.min(H1 - f.len, h));
       setDrag({ d: i, h });
     };
@@ -41,52 +67,52 @@ export function Week({ form: f, part, events, cal, slotList, hover, onCreate, on
   return (
     <div className="week">
       <div />
-      {DAYS.map((d, i) => (
-        <div key={d} className={'dh' + (i === 2 ? ' today' : '')}><b>{DATES[i]}</b>{d}</div>
+      {displayDays.map((d, i) => (
+        <div key={d} className={'dh' + (i === (figma ? 1 : 2) ? ' today' : '') + (i >= 5 ? ' weekend' : '')}><b>{displayDates[i]}</b>{d}</div>
       ))}
-      <div className="tcol" style={{ height: (H1 - H0) * RH }}>
-        {hours.map((h) => <span key={h} style={{ top: (h - H0) * RH }}>{h}:00</span>)}
+      <div className="tcol" style={{ height: (gridEnd - H0) * gridRowHeight }}>
+        {hours.map((h) => <span key={h} style={{ top: (h - H0) * gridRowHeight }}>{h}:00</span>)}
       </div>
-      {DAYS.map((_, d) => (
-        <div key={d} className="dcol" ref={(el) => { cols.current[d] = el; }} style={{ height: (H1 - H0) * RH }}>
-          {hours.slice(1).map((h) => <div key={h} className="hl" style={{ top: (h - H0) * RH }} />)}
+      {displayDays.map((_, d) => (
+        <div key={d} className={'dcol' + (d >= 5 ? ' weekend' : '')} ref={(el) => { cols.current[d] = el; }} style={{ height: (gridEnd - H0) * gridRowHeight }}>
+          {hours.slice(1).map((h) => <div key={h} className="hl" style={{ top: (h - H0) * gridRowHeight }} />)}
           {heat && halves.map((x) => {
             const bn = busyNames(f!, d, x, x + 0.5), N = f!.people.length, fr = N - bn.length, r = fr / N;
             const col = r >= 1 ? 'var(--vkui--color_background_positive)' : r >= 0.9 ? 'var(--vkui--color_background_warning)' : 'var(--vkui--color_background_negative)';
             return (
               <div key={x} className={'heat' + (r < 0.9 ? ' bad' : '')} title={bn.length ? 'Заняты: ' + bn.join(', ') : 'Свободны все'}
-                style={{ top: (x - H0) * RH, height: RH / 2, backgroundColor: `color-mix(in srgb, ${col} ${r >= 1 ? 14 : r >= 0.9 ? 18 : 22}%, transparent)` }}>
+                style={{ top: (x - H0) * gridRowHeight, height: gridRowHeight / 2, backgroundColor: `color-mix(in srgb, ${col} ${r >= 1 ? 14 : r >= 0.9 ? 18 : 22}%, transparent)` }}>
                 {r < 1 && <span>{fr}/{N}</span>}
               </div>
             );
           })}
-          {events.filter((x) => x.d === d).map((x, i) => (
-            <div key={i} className={'ev ' + (x.c || '')} style={{ top: (x.s - H0) * RH + 1, height: (x.e - x.s) * RH - 2 }}>
+          {displayEvents.filter((x) => x.d === d).map((x, i) => (
+            <div key={i} className={'ev ' + (x.c || '')} style={{ top: (x.s - H0) * gridRowHeight + 1, height: (x.e - x.s) * gridRowHeight - 2 }}>
               {x.t}{x.e - x.s >= 1 && <small>{fmt(x.s)}–{fmt(x.e)}</small>}
             </div>
           ))}
           {side && !heat && f!.people.length > 0 && segments(f!, d).map((sg, i) => (
-            <div key={i} className="ov" title={'Заняты: ' + sg.n} style={{ top: (sg.s - H0) * RH + 1, height: (sg.e - sg.s) * RH - 2 }}><b>{sg.n}</b></div>
+            <div key={i} className="ov" title={'Заняты: ' + sg.n} style={{ top: (sg.s - H0) * gridRowHeight + 1, height: (sg.e - sg.s) * gridRowHeight - 2 }}><b>{sg.n}</b></div>
           ))}
-          {!f && !part && halves.map((x) => (
-            <Tappable key={x} className="cell" style={{ top: (x - H0) * RH, height: RH / 2 }} activeMode="opacity" hoverMode="background"
+          {d < 5 && !f && !part && halves.map((x) => (
+            <Tappable key={x} className="cell" style={{ top: (x - H0) * gridRowHeight, height: gridRowHeight / 2 }} activeMode="opacity" hoverMode="background"
               aria-label={`Создать: ${DAYS[d]} ${fmt(x)}`} onClick={() => onCreate(d, Math.min(x, H1 - 1))} />
           ))}
-          {f && f.mode === 'pop' && halves.map((x) => (
-            <Tappable key={x} className="cell" style={{ top: (x - H0) * RH, height: RH / 2 }} hoverMode="background" aria-label="Закрыть форму" onClick={onOutside} />
+          {d < 5 && f && f.mode === 'pop' && halves.map((x) => (
+            <Tappable key={x} className="cell" style={{ top: (x - H0) * gridRowHeight, height: gridRowHeight / 2 }} hoverMode="background" aria-label="Закрыть форму" onClick={onOutside} />
           ))}
           {f && hover != null && slotList[hover] && slotList[hover].d === d && !(slotList[hover].d === f.d && slotList[hover].s === f.s) && (
-            <div className="ghost" style={{ top: (slotList[hover].s - H0) * RH + 1, height: f.len * RH - 2 }}>{fmt(slotList[hover].s)} · сюда переедет событие</div>
+            <div className="ghost" style={{ top: (slotList[hover].s - H0) * gridRowHeight + 1, height: f.len * gridRowHeight - 2 }}>{fmt(slotList[hover].s)} · сюда переедет событие</div>
           )}
           {f && dd === d && (
             <div id="draft" className={'draft' + (anna ? ' anna' : '') + (conf ? ' conf' : '') + (drag ? ' dragging' : '')}
-              style={{ top: (ds! - H0) * RH + 1, height: f.len * RH - 2 }}
+              style={{ top: (ds! - H0) * gridRowHeight + 1, height: f.len * gridRowHeight - 2 }}
               onPointerDown={(e) => { e.preventDefault(); setDrag({ d: f.d, h: f.s }); }}>
               <span id="dtitle">{f.title || 'Новое событие'}</span><small>{fmt(ds!)}–{fmt(ds! + f.len)}</small>
             </div>
           )}
           {part && part.d === d && (
-            <div className="draft" style={{ top: (part.s - H0) * RH + 1, height: (part.e - part.s) * RH - 2 }}>{part.t}<small>{fmt(part.s)}–{fmt(part.e)}</small></div>
+            <div className="draft" style={{ top: (part.s - H0) * gridRowHeight + 1, height: (part.e - part.s) * gridRowHeight - 2 }}>{part.t}<small>{fmt(part.s)}–{fmt(part.e)}</small></div>
           )}
         </div>
       ))}

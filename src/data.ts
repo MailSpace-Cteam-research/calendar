@@ -11,7 +11,7 @@ export type Form = {
   mode: 'pop' | 'side'; title: string; d: number; s: number; len: number;
   people: string[]; ext: string[]; room: string | null; roomAuto: boolean;
   repeat: boolean; call: boolean; desc: boolean; files: boolean; place: boolean;
-  open: string | null; owner: 'me' | 'anna'; peopleOpen?: boolean; filesAccess?: string;
+  open: string | null; owner: 'me' | 'anna'; peopleOpen?: boolean; filesAccess?: string; eventColor?: string;
 };
 
 export const fmt = (h: number) => { const m = Math.round((h % 1) * 60); return `${Math.floor(h)}:${m < 10 ? '0' + m : m}`; };

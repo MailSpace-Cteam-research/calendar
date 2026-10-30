@@ -7,6 +7,8 @@ import '@vkontakte/vkui-tokens/themes/calendar/cssVars/declarations/onlyVariable
 import '@vkontakte/vkui-tokens/themes/calendarDark/cssVars/declarations/onlyVariablesLocal.css';
 import './styles.css';
 import App from './App';
+import FigmaCalendar from './FigmaCalendar';
+import { Button } from '@vkontakte/vkui';
 
 /** Артефакт может явно выставить тему через data-theme на <html>; иначе VKUI берёт prefers-color-scheme */
 function useHostColorScheme() {
@@ -25,6 +27,7 @@ function useHostColorScheme() {
 
 function Root() {
   const colorScheme = useHostColorScheme();
+  const [classic, setClassic] = useState(false);
   return (
     <ConfigProvider
       colorScheme={colorScheme}
@@ -32,7 +35,7 @@ function Root() {
       tokensClassNames={{ light: 'vkui--calendar--light', dark: 'vkui--calendar--dark' }}
     >
       <AppRoot>
-        <App />
+        {classic ? <><div style={{ padding: 12 }}><Button mode="secondary" onClick={() => setClassic(false)}>← Новый макет Figma</Button></div><App /></> : <FigmaCalendar onLegacy={() => setClassic(true)} />}
       </AppRoot>
     </ConfigProvider>
   );

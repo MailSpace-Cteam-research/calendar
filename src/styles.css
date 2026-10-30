@@ -142,3 +142,164 @@ body {
 .dec { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 .deccard { padding: 14px 16px; display: flex !important; flex-direction: column; gap: 6px; }
 .src { color: var(--vkui--color_text_accent); }
+
+
+/* Figma 96:39656. VKUI calendar theme provides all UI colors and typography. */
+.figma-event-form.form.pop,
+.figma-event-form.form.side {
+  box-sizing: border-box;
+  width: 420px;
+  max-width: min(420px, calc(100vw - 24px));
+  flex: none;
+  gap: 6px;
+  padding: 6px;
+  border: 0;
+  border-radius: 24px !important;
+  background: color-mix(in srgb, var(--vkui--color_background_content) 80%, transparent);
+  box-shadow: var(--vkui--elevation3, 0 12px 40px rgba(0, 16, 61, .12));
+  backdrop-filter: blur(24px);
+  overflow: visible;
+}
+.figma-event-form.form.pop { position: absolute; z-index: 20; }
+.figma-event-form.form.side { min-height: 0; height: fit-content; align-self: flex-start; border-radius: 24px !important; }
+.figma-ai-head { display: flex; flex: 0 0 36px; width: 100%; align-items: center; gap: 8px; padding-right: 8px; }
+.figma-ai-head > .vkuiIconButton { flex: none; }
+.figma-ai-action {
+  display: flex !important; flex: 1 1 auto; height: 36px; min-width: 0; gap: 12px;
+  align-items: center; padding: 8px 16px 8px 32px !important; border-radius: 18px !important;
+}
+.figma-ai-action .vkuiText { font-size: 15px; line-height: 20px; white-space: nowrap; color: var(--vkui--color_text_accent); }
+.figma-ai-star { color: var(--vkui--color_icon_accent); flex: none; }
+.figma-ai-editor {
+  display: flex; gap: 8px; padding: 8px 12px 12px; background: var(--vkui--color_background_content);
+  border-radius: 18px; align-items: center;
+}
+.figma-ai-editor .vkuiInput { min-width: 0; flex: 1; }
+.figma-panel { flex: none; width: 100%; min-height: 346px; display: flex; flex-direction: column; overflow: visible; background: var(--vkui--color_background_modal, var(--vkui--color_background_content)); border-radius: 18px; }
+.figma-form-head {
+  height: 68px; min-height: 68px; display: flex; align-items: center;
+  padding: 16px 20px 16px 24px; position: relative;
+}
+.figma-form-head .figma-smile { width: 36px; height: 36px; flex: none; }
+.figma-form-head .figma-title { min-width: 0; flex: 1; }
+.figma-form-head .figma-title input {
+  padding: 4px 12px !important; height: 36px; font-size: 24px !important;
+  font-family: var(--vkui--font_family_base); font-weight: 500 !important; line-height: 28px;
+  letter-spacing: 0;
+}
+.figma-form-head .figma-title input::placeholder { color: var(--vkui--color_text_tertiary); opacity: 1; }
+.figma-color-control { display: flex !important; flex: 0 0 48px; height: 26px; align-items: center; justify-content: center; gap: 4px; border-radius: 8px !important; }
+.figma-event-color { display: block; width: 14px; height: 14px; border-radius: 50%; }
+.figma-color-control .vkuiIcon { color: var(--vkui--color_icon_secondary); }
+.figma-palette {
+  position: absolute; z-index: 50; right: 14px; top: 52px; width: 244px;
+  padding: 16px; border-radius: 16px; background: var(--vkui--color_background_content);
+  box-shadow: var(--vkui--elevation3); border: 1px solid var(--vkui--color_separator_primary);
+}
+.figma-colors { display: grid; grid-template-columns: repeat(6, 32px); gap: 4px; margin-top: 10px; }
+.figma-color-item { width: 32px; height: 32px; padding: 0 !important; border-radius: 50% !important; display: flex !important; align-items: center; justify-content: center; }
+.figma-color-item span { width: 27px; height: 27px; border-radius: 50%; }
+.figma-color-item[aria-pressed=true] { outline: 2px solid var(--vkui--color_stroke_accent); outline-offset: 0; }
+.figma-form-body { width: 100%; padding: 0 16px 0 32px; flex: 1; min-height: 198px; }
+.figma-field-row { display: flex; width: 100%; min-height: 36px; align-items: center; gap: 12px; }
+.figma-field-icon { flex: 0 0 20px; color: var(--vkui--color_icon_secondary); }
+.figma-date-main { min-width: 0; flex: 1 1 auto; display: flex; align-items: center; gap: 0; }
+.figma-date-choice { min-width: 0; width: 92px; flex: 0 0 92px; }
+.figma-date-choice .vkuiSelect__title, .figma-date-choice .vkuiCustomSelect__title { white-space: nowrap; }
+.figma-date-choice .vkuiIcon { display: none; }
+.figma-clock-input { width: 57px; min-width: 0; flex: 0 0 57px; }
+.figma-clock-input input { width: 100%; text-align: center; padding: 8px 0 !important; font-size: 15px; }
+.figma-dash { flex: 0 0 11px; text-align: center; font-size: 15px; }
+.figma-all-day { margin-left: auto; white-space: nowrap; flex: none; }
+.figma-field-row .vkuiInput__el, .figma-field-row .vkuiCustomSelect__el, .figma-field-row .vkuiInput input {
+  font-size: 15px;
+}
+.figma-field-row .vkuiInput { height: 36px; }
+.figma-field-row .vkuiInput input { padding: 8px !important; }
+.figma-people-wrap { min-width: 0; flex: 1; }
+.figma-people-wrap .vkuiChipsSelect { width: 100%; min-height: 36px; }
+.figma-people-wrap input::placeholder { color: var(--vkui--color_text_tertiary); opacity: 1; }
+.figma-call-row { gap: 20px; }
+.figma-call-placeholder { flex: 1; min-width: 0; padding: 8px 0 !important; font-size: 15px; color: var(--vkui--color_text_tertiary); }
+.figma-call-active { flex: 1; min-width: 0; display: flex; align-items: center; }
+.figma-call-active .vkuiInput { min-width: 0; flex: 1; }
+.figma-expanded { padding: 6px 0 4px; }
+.figma-expanded .vkuiSimpleCell { min-height: 36px; }
+.figma-extra-pills {
+  padding-top: 16px; padding-left: 0; display: flex; flex-wrap: wrap;
+  gap: 6px; align-content: flex-start; align-items: flex-start;
+  min-height: 90px;
+}
+.figma-extra-pills .figma-pill {
+  flex: 0 0 auto; height: 34px; min-height: 34px;
+  border-radius: 30px !important; padding-inline: 10px 14px;
+  background: var(--vkui--color_background_secondary_alpha, var(--vkui--color_background_secondary));
+  color: var(--vkui--color_text_primary); font-size: 15px;
+}
+.figma-pill .vkuiButton__content { gap: 6px; }
+.figma-pill .vkuiIcon { color: var(--vkui--color_icon_secondary); }
+.figma-form-footer { min-height: 80px; display: flex; flex: 0 0 80px; gap: 8px; align-items: flex-start; padding: 24px 32px 20px; }
+.figma-form-footer .figma-save { height: 36px; min-height: 36px; padding-inline: 16px; border-radius: 10px; font-size: 15px; }
+.figma-calendar-select { width: 153px; flex: 0 0 153px; height: 36px; }
+.figma-calendar-select .vkuiIcon { color: var(--vkui--color_icon_secondary); }
+.figma-collapse { margin-left: auto; }
+.figma-owner { padding: 10px 16px 0; }
+.figma-owner .vkuiCustomSelect { max-width: 200px; }
+/* Figma 96:41371 — недельный календарь, исходная React-сетка остается интерактивной. */
+.wrap.figma-mode { width: 100%; max-width: none; margin: 0; gap: 18px; }
+body:has(.figma-mode) { padding: 0; }
+.wrap.figma-mode .frame { order: -1; border-radius: 0; box-shadow: none; overflow: auto; }
+.wrap.figma-mode .app { min-width: 1180px; min-height: 820px; height: 820px; grid-template-columns: 60px 250px minmax(0,1fr) auto; background: var(--vkui--color_background_secondary); border-radius: 0; }
+.wrap.figma-mode .nav { background: var(--vkui--color_background_contrast); gap: 4px; padding: 10px 0; }
+.wrap.figma-mode .nav .nav-logo { margin-bottom: 8px; }
+.wrap.figma-mode .nav .vkuiIconButton { width: 40px; height: 40px; color: var(--vkui--color_icon_contrast); }
+.wrap.figma-mode .nav .nav-active { background: var(--vkui--color_background_tertiary); border-radius: 10px; }
+.wrap.figma-mode .left { width: 250px; padding: 12px 8px; gap: 12px; }
+.wrap.figma-mode .left > div:first-child { margin-inline: 4px; }
+.wrap.figma-mode .left .mmh { padding-inline: 12px; font-size: 15px; }
+.wrap.figma-mode .mm { font-size: 12px; gap: 3px; }
+.wrap.figma-mode .mm b { padding: 6px 0; }
+.wrap.figma-mode .cals { margin-top: 10px; }
+.wrap.figma-mode .main { padding: 12px 12px 0 8px; }
+.wrap.figma-mode .tb { margin-bottom: 5px; min-height: 36px; gap: 6px; }
+.wrap.figma-mode .tb .vkuiHeadline { font-size: 15px; font-weight: 500; margin-left: 5px; }
+.wrap.figma-mode .grid { padding: 0; height: calc(100% - 41px); border-radius: 14px 14px 0 0; overflow: auto; }
+.wrap.figma-mode .week { grid-template-columns: 44px repeat(7, minmax(0, 1fr)); }
+.wrap.figma-mode .dh { height: 61px; border: 0; padding: 12px 8px 8px; background: var(--vkui--color_background_content); }
+.wrap.figma-mode .dh b { font-size: 23px; font-weight: 500; }
+.wrap.figma-mode .dcol { background: var(--vkui--color_background_content); }
+.wrap.figma-mode .dcol.weekend { background: color-mix(in srgb, var(--vkui--color_background_secondary) 45%, var(--vkui--color_background_content)); }
+.wrap.figma-mode .ev { border-radius: 7px; font-size: 12px; padding: 4px; color: var(--vkui--color_text_primary); }
+.wrap.figma-mode .legend { display: none; }
+.wrap.figma-mode .empty { display: none; }
+.wrap.figma-mode .figma-event-form.pop { top: 115px !important; left: 330px !important; }
+.wrap.figma-mode > .hdr, .wrap.figma-mode > .remote, .wrap.figma-mode > .cap, .wrap.figma-mode > .sech, .wrap.figma-mode > .dec { margin-inline: max(16px, calc((100vw - 1366px)/2)); }
+@media (max-width: 650px) {
+  .figma-event-form.form.pop, .figma-event-form.form.side { width: min(420px, calc(100vw - 16px)); }
+  .figma-field-row { gap: 8px; }
+  .figma-form-body { padding-left: 18px; padding-right: 10px; }
+  .figma-date-choice { width: 85px; flex-basis: 85px; }
+  .figma-clock-input { width: 50px; flex-basis: 50px; }
+  .figma-form-footer { padding-inline: 18px; }
+}
+
+/* Week toolbar / compact seven-day state. */
+.wrap.figma-mode .figma-view-nav { display: flex; align-items: center; gap: 0; margin-left: auto; }
+.wrap.figma-mode .figma-view-nav .vkuiButton { color: var(--vkui--color_text_secondary); font-size: 14px; padding-inline: 10px; min-width: 0; }
+.wrap.figma-mode .figma-view-nav .selected { color: var(--vkui--color_text_primary); font-weight: 500; }
+.wrap.figma-mode .figma-view-nav .vkuiButton:last-child { color: var(--vkui--color_text_primary); margin-left: 8px; }
+.wrap.figma-mode .dh.weekend { background: color-mix(in srgb, var(--vkui--color_background_secondary) 45%, var(--vkui--color_background_content)); }
+.wrap.figma-mode .week { width: 100%; }
+.wrap.figma-mode .tcol { background: var(--vkui--color_background_content); }
+.wrap.figma-mode .tcol span { font-size: 12px; }
+
+/* Figma form geometric normalization: VKUI subcomponents otherwise add content-box paddings. */
+.figma-event-form, .figma-event-form * { box-sizing: border-box; }
+.figma-event-form .figma-ai-head { height: 36px; flex: 0 0 36px; }
+.figma-event-form .figma-ai-action { height: 36px; }
+.figma-event-form .figma-extra-pills { height: 90px; min-height: 90px; gap: 6px; align-content: flex-start; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(1) { width: 103px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(2) { width: 97px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(3) { width: 122px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(4) { width: 98px; }
+.figma-event-form .figma-extra-pills .figma-pill:nth-child(5) { width: 146px; }

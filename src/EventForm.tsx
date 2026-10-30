@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import {
-  Accordion, Avatar, Button, Card, ChipsSelect, CustomSelect, CustomSelectOption, Footnote, IconButton,
+  Accordion, Avatar, Button, Card, Checkbox, ChipsSelect, CustomSelect, CustomSelectOption, Footnote, IconButton, SimpleCell,
   Input, Link, MiniInfoCell, Radio, SegmentedControl, Tappable, Text,
 } from '@vkontakte/vkui';
 import { Chip } from '@vkontakte/vkui';
@@ -8,6 +9,7 @@ import {
   Icon20CheckCircleOn, Icon20ClockOutline, Icon20FullscreenExitOutline, Icon20FullscreenOutline,
   Icon20NotificationOutline, Icon20PlaceOutline, Icon20PollOutline, Icon20RefreshOutline,
   Icon20Users3Outline, Icon20UsersOutline, Icon20VideocamOutline, Icon20WarningTriangleOutline,
+  Icon20SmileOutline, Icon20Stars, Icon16Dropdown, Icon20CalendarOutline,
 } from '@vkontakte/icons';
 import {
   DAYF, DAYS, FREQUENT, H1, POOL, ROOMS, busyNames, durT, fmt, gender, grad, ownerBusy, personStatus,
@@ -65,7 +67,7 @@ function TimeBlock({ f, cal, sl, A }: { f: Form; cal: Ev[]; sl: Slot[]; A: FormA
   );
 }
 
-function People({ f, A }: { f: Form; A: FormActions }) {
+function People({ f, A, placeholder = 'Имя, почта или группа' }: { f: Form; A: FormActions; placeholder?: string }) {
   const chosen = [...f.people, ...f.ext];
   const options = [
     ...[...FREQUENT, ...POOL.filter((n) => !FREQUENT.includes(n))].filter((n) => !chosen.includes(n)).map((n) => ({ value: n, label: n })),
@@ -73,7 +75,7 @@ function People({ f, A }: { f: Form; A: FormActions }) {
   ];
   return (
     <ChipsSelect
-      placeholder="Имя, почта или группа"
+      placeholder={placeholder}
       value={chosen.map((n) => ({ value: n, label: n }))}
       options={options}
       creatable="Пригласить по почте"
@@ -142,52 +144,160 @@ const BLOCKS: Blk[] = [
 ];
 const ADDS: [string, string][] = [['people', 'Участники'], ['call', 'Звонок'], ['room', 'Переговорка'], ['repeat', 'Повтор'], ['desc', 'Описание'], ['files', 'Файлы'], ['place', 'Место']];
 
-export function EventForm({ f, cal, sl, delegated, A }: { f: Form; cal: Ev[]; sl: Slot[]; delegated: boolean; A: FormActions }) {
-  const pop = f.mode === 'pop', anna = f.owner === 'anna';
-  const n = f.people.length + f.ext.length;
-  const avail = ADDS.filter(([k]) => !BLOCKS.find((b) => b.k === k)!.on(f));
-  const body = pop ? (<>
-    {(n > 0 || f.peopleOpen) && <div className="row"><Icon20UsersOutline className="ric" /><div className="c"><People f={f} A={A} /></div></div>}
-    {f.call && <div className="row"><Icon20VideocamOutline className="ric" /><div className="c"><Link>calls.mail.ru/room/7a3f-91c2</Link><Footnote className="muted">добавлен сам, потому что есть участники</Footnote></div></div>}
-    {f.place && <div className="row"><Icon20PlaceOutline className="ric" /><div className="c"><Text>Ленинградский пр-т, 39, стр. 79</Text></div></div>}
-  </>) : (
-    <div className="blocks">
-      {BLOCKS.filter((b) => b.on(f)).map((b) => (
-        <Accordion key={b.k} expanded={f.open === b.k} onChange={(v) => A.set((x) => { x.open = v ? b.k : null; })}>
-          <Accordion.Summary before={b.icon} iconPosition="after"
-            overTitle={<>{b.name}{b.me && <span className="tag">видите только вы</span>}</>}>{b.sum(f)}</Accordion.Summary>
-          <Accordion.Content><div className="blkbody">{b.body(f, A)}</div></Accordion.Content>
-        </Accordion>
-      ))}
-    </div>
-  );
-  const Root: any = pop ? Card : 'div';
+
+/**
+ * Figma 96:39656 — компактная форма события. Только VKUI и @vkontakte/icons.
+ * Содержимое привязано к общей модели Form, поэтому изменения переживают переключение pop/side.
+ */
+const EVENT_COLORS = [
+  '#ed5795', '#0077ff', '#24b8b2', '#8f62d5', '#ffb84d', '#6d95e8',
+  '#d86776', '#48bb78', '#9f7add', '#f1a94e', '#667c93', '#c26fbb',
+];
+
+export function EventForm({ f, cal: _cal, sl: _sl, delegated, A }: { f: Form; cal: Ev[]; sl: Slot[]; delegated: boolean; A: FormActions }) {
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [allDay, setAllDay] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [callUrl, setCallUrl] = useState('');
+  const [timeText, setTimeText] = useState<string | null>(null);
+  const [endText, setEndText] = useState<string | null>(null);
+  const pop = f.mode === 'pop';
+  const peopleCount = f.people.length + f.ext.length;
+  const color = f.eventColor || '#ed5795';
+  const startTime = fmt(f.s), endTime = fmt(f.s + f.len);
+  const inactiveExtras = [
+    { k: 'repeat', label: 'Повтор', icon: <Icon20RefreshOutline />, visible: !f.repeat },
+    { k: 'place', label: 'Место', icon: <Icon20BuildingOutline />, visible: !f.place },
+    { k: 'desc', label: 'Описание', icon: <Icon20ArticleBoxOutline />, visible: !f.desc },
+    { k: 'files', label: 'Файлы', icon: <Icon20Attach />, visible: !f.files },
+    { k: 'notifications', label: 'Уведомления', icon: <Icon20NotificationOutline />, visible: !notifyOpen },
+  ].filter((item) => item.visible);
+  const setHour = (text: string, target: 'start' | 'end') => {
+    const match = /^(\d{1,2}):(\d{2})$/.exec(text.trim());
+    if (!match) return;
+    const h = Number(match[1]) + Number(match[2]) / 60;
+    if (!Number.isFinite(h) || h < 10 || h > 18) return;
+    A.set((x) => {
+      if (target === 'start') { x.s = Math.min(h, 18 - x.len); }
+      else if (h > x.s) { x.len = Math.min(h - x.s, 18 - x.s); }
+    });
+    if (target === 'start') setTimeText(null);
+    else setEndText(null);
+  };
+  const extra = (k: string) => {
+    if (k === 'notifications') { setNotifyOpen(true); return; }
+    A.addBlock(k);
+  };
   return (
-    <Root {...(pop ? { mode: 'shadow' } : {})} className={'form ' + f.mode} id="form" role="dialog" aria-label="Событие">
-      {delegated && (
-        <CustomSelect className={'ownersel' + (anna ? ' anna' : '')} value={f.owner}
-          before={<Avatar size={24} initials={anna ? 'А' : 'Я'} gradientColor={anna ? 5 : 1} />}
-          options={[{ value: 'me', label: 'Мой календарь', description: '' }, { value: 'anna', label: 'Анна Смирнова', description: 'вы — ассистент' }]}
-          renderOption={({ option, ...rest }: any) => <CustomSelectOption {...rest} before={<Avatar size={24} initials={option.value === 'anna' ? 'А' : 'Я'} gradientColor={option.value === 'anna' ? 5 : 1} />} description={option.description} />}
-          onChange={(e: any, v: any) => { const val = v ?? e?.target?.value; A.set((x) => { x.owner = val === 'anna' ? 'anna' : 'me'; }); }} />
-      )}
-      <div className="fh">
-        <Input mode="plain" className="ttl" id="ttl" value={f.title} placeholder="Название" aria-label="Название" onChange={(e) => { const v = e.target.value; A.set((x) => { x.title = v; }); }} />
-        <IconButton label={pop ? 'Развернуть в сайдбар' : 'Свернуть'} onClick={pop ? A.grow : A.shrink}>{pop ? <Icon20FullscreenOutline /> : <Icon20FullscreenExitOutline />}</IconButton>
-        <IconButton label="Закрыть" onClick={A.close}><Icon20Cancel /></IconButton>
+    <Card mode="shadow" className={'form ' + f.mode + ' figma-event-form'} id="form" role="dialog" aria-label="Создание события">
+      <div className="figma-ai-head">
+        <Tappable className="figma-ai-action" onClick={() => setAiOpen((v) => !v)}>
+          <Icon20Stars className="figma-ai-star" />
+          <Text>Заполнить с нейропомощником</Text>
+        </Tappable>
+        <IconButton label="Закрыть форму" onClick={A.close}><Icon20Cancel /></IconButton>
       </div>
-      <TimeBlock f={f} cal={cal} sl={sl} A={A} />
-      {body}
-      {avail.length > 0 && (
-        <div className="adds">{avail.map(([k, t]) => <Button key={k} size="s" mode="secondary" before={<Icon16Add />} onClick={() => A.addBlock(k)}>{t}</Button>)}</div>
+      {aiOpen && (
+        <div className="figma-ai-editor">
+          <Input mode="plain" value={aiPrompt} placeholder="Например: встреча с Машей завтра в 15:00"
+            onChange={(e) => setAiPrompt(e.target.value)} aria-label="Запрос нейропомощнику" />
+          <Button mode="primary" size="s" disabled={!aiPrompt.trim()} onClick={() => {
+            const title = aiPrompt.replace(/\s*(завтра|сегодня|в\s+\d{1,2}:\d{2}).*$/i, '').trim() || aiPrompt;
+            A.set((x) => { x.title = title; });
+            setAiOpen(false);
+          }}>Заполнить</Button>
+        </div>
       )}
-      <div className="foot">
-        <Button size={pop ? 'm' : 'l'} mode="primary" className={anna ? 'annabtn' : ''} onClick={A.send}>
-          {n ? `${anna ? 'Отправить от имени Анны' : 'Отправить приглашения'} (${n})` : 'Сохранить'}
-        </Button>
-        {pop && <Button size="m" mode="secondary" onClick={A.grow}>Подробнее</Button>}
+      <div className="figma-panel">
+        {delegated && <div className="figma-owner">
+          <CustomSelect value={f.owner} mode="plain" options={[{value:'me',label:'Мой календарь'},{value:'anna',label:'Анна Смирнова'}]}
+            onChange={(_e: any, v: any) => A.set((x) => { x.owner = v === 'anna' ? 'anna' : 'me'; })} />
+        </div>}
+        <div className="figma-form-head">
+          <IconButton label="Иконка события" className="figma-smile" onClick={() => setPaletteOpen((v) => !v)}>
+            <Icon20SmileOutline />
+          </IconButton>
+          <Input className="figma-title" mode="plain" value={f.title}
+            placeholder="Добавьте название" aria-label="Название события"
+            onChange={(e) => { const title = e.target.value; A.set((x) => { x.title = title; }); }} />
+          <Tappable className="figma-color-control" aria-label="Выбрать цвет события"
+            aria-expanded={paletteOpen} onClick={() => setPaletteOpen((v) => !v)}>
+            <span className="figma-event-color" style={{ backgroundColor: color }} />
+            <Icon16Dropdown />
+          </Tappable>
+          {paletteOpen && <div className="figma-palette" role="group" aria-label="Цвет события">
+            <Footnote>Цвет события</Footnote>
+            <div className="figma-colors">
+              {EVENT_COLORS.map((c) => <Tappable key={c} className="figma-color-item"
+                aria-label={'Выбрать ' + c} aria-pressed={c === color}
+                onClick={() => { A.set((x) => { x.eventColor = c; }); setPaletteOpen(false); }}>
+                <span style={{ backgroundColor: c }} />
+              </Tappable>)}
+            </div>
+          </div>}
+        </div>
+        <div className="figma-form-body">
+          <div className="figma-field-row figma-date-row">
+            <Icon20ClockOutline className="figma-field-icon" />
+            <div className="figma-date-main">
+              <CustomSelect className="figma-date-choice" mode="plain" value={String(f.d)} aria-label="Дата события"
+                options={DAYF.map((label, i) => ({ value: String(i), label }))}
+                onChange={(_e: any, v: any) => A.set((x) => { x.d = Number(v); })} />
+              <Input className="figma-clock-input" mode="plain" aria-label="Начало" value={timeText ?? startTime}
+                onChange={(e) => setTimeText(e.target.value)}
+                onBlur={() => { if (timeText !== null) setHour(timeText, 'start'); setTimeText(null); }} />
+              <Text className="figma-dash">—</Text>
+              <Input className="figma-clock-input" mode="plain" aria-label="Окончание" value={endText ?? endTime}
+                onChange={(e) => setEndText(e.target.value)}
+                onBlur={() => { if (endText !== null) setHour(endText, 'end'); setEndText(null); }} />
+            </div>
+            <Checkbox className="figma-all-day" checked={allDay} onChange={(e) => setAllDay(e.target.checked)}>Весь день</Checkbox>
+          </div>
+          <div className="figma-field-row">
+            <Icon20UsersOutline className="figma-field-icon" />
+            <div className="figma-people-wrap">
+              <People f={f} A={A} placeholder="Пригласить участников" />
+            </div>
+          </div>
+          <div className="figma-field-row figma-call-row">
+            <Icon20VideocamOutline className="figma-field-icon" />
+            {f.call ? (
+              <div className="figma-call-active">
+                <Input mode="plain" value={callUrl || 'calls.mail.ru/room/7a3f-91c2'}
+                  onChange={(e) => setCallUrl(e.target.value)} aria-label="Ссылка на звонок" />
+                <IconButton label="Удалить видеовстречу" onClick={() => A.set((x) => { x.call = false; })}><Icon20Cancel /></IconButton>
+              </div>
+            ) : <Tappable className="figma-call-placeholder" onClick={() => A.addBlock('call')}>Ссылка на звонок</Tappable>}
+          </div>
+          {(f.repeat || f.place || f.desc || f.files || f.room || notifyOpen) && (
+            <div className="figma-expanded">
+              {f.repeat && <SimpleCell before={<Icon20RefreshOutline />} onClick={() => A.set((x) => { x.repeat = false; })}>Повтор: каждую неделю · убрать</SimpleCell>}
+              {f.place && <Input mode="plain" before={<Icon20BuildingOutline />} defaultValue="Ленинградский пр-т, 39" aria-label="Место встречи" />}
+              {f.desc && <Input mode="plain" before={<Icon20ArticleBoxOutline />} defaultValue="Повестка встречи" aria-label="Описание встречи" />}
+              {f.files && <SimpleCell before={<Icon20Attach />} onClick={() => A.set((x) => { x.files = false; })}>Файлы · добавить или убрать</SimpleCell>}
+              {f.room && <SimpleCell before={<Icon20BuildingOutline />} onClick={() => A.set((x) => { x.room = null; })}>Переговорка: {f.room} · убрать</SimpleCell>}
+              {notifyOpen && <SimpleCell before={<Icon20NotificationOutline />} onClick={() => setNotifyOpen(false)}>За 15 минут до события · убрать</SimpleCell>}
+            </div>
+          )}
+          <div className="figma-extra-pills">
+            {inactiveExtras.map(({ k, label, icon }) => (
+              <Button key={k} className="figma-pill" mode="secondary" size="m" before={icon}
+                onClick={() => extra(k)}>{label}</Button>
+            ))}
+          </div>
+        </div>
+        <div className="figma-form-footer">
+          <Button className="figma-save" size="m" mode="primary" onClick={A.send}>Сохранить</Button>
+          <CustomSelect className="figma-calendar-select" mode="plain" value={f.owner}
+            before={<Icon20CalendarOutline />} icon={<Icon16Dropdown />}
+            options={[{ value: 'me', label: 'Основной' }, { value: 'anna', label: 'Рабочий' }]}
+            onChange={(_e: any, v: any) => A.set((x) => { x.owner = v === 'anna' ? 'anna' : 'me'; })} />
+          {!pop && <IconButton className="figma-collapse" label="Свернуть в поповер" onClick={A.shrink}><Icon20FullscreenExitOutline /></IconButton>}
+        </div>
       </div>
-    </Root>
+    </Card>
   );
 }
 
