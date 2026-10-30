@@ -7,7 +7,7 @@ import {
   Icon16Add, Icon20ArticleBoxOutline, Icon20Attach, Icon20BuildingOutline, Icon20Cancel,
   Icon20CheckCircleOn, Icon20ClockOutline, Icon20FullscreenExitOutline, Icon20FullscreenOutline,
   Icon20NotificationOutline, Icon20PlaceOutline, Icon20PollOutline, Icon20RefreshOutline,
-  Icon20Users3Outline, Icon20UsersOutline, Icon20VideocamOutline, Icon20WarningTriangleOutline, Icon20SmileOutline,
+  Icon20Users3Outline, Icon20UsersOutline, Icon20VideocamOutline, Icon20WarningTriangleOutline,
 } from '@vkontakte/icons';
 import {
   DAYF, DAYS, FREQUENT, H1, POOL, ROOMS, busyNames, durT, fmt, gender, grad, ownerBusy, personStatus,
@@ -220,6 +220,7 @@ export function EventForm({ f, cal, sl, delegated, A }: { f: Form; cal: Ev[]; sl
           </button>
         ))}
       </div>
+      {f.open === 'mine' && <div className="design-notice">Уведомления: в приложении за 15 минут до события.</div>}
       {(f.repeat || f.room || f.desc || f.files || f.place) && (
         <div className="design-expanded-options">
           {BLOCKS.filter((b) => ['repeat','room','desc','files','place'].includes(b.k) && b.on(f)).map((b) => (
@@ -263,9 +264,9 @@ export function EventForm({ f, cal, sl, delegated, A }: { f: Form; cal: Ev[]; sl
         <div className="design-header">
           <button type="button" className="design-emoji" aria-label="Эмодзи события">☺</button>
           <Input mode="plain" className="ttl" id="ttl" value={f.title} placeholder="Добавьте название" aria-label="Название" onChange={(e) => { const v = e.target.value; A.set((x) => { x.title = v; }); }} />
-          <button type="button" className="design-color" onClick={() => A.set((x) => { x.open = x.open === 'color' ? null : 'color'; })}><span />⌄</button>
+          <button type="button" className="design-color" onClick={() => A.set((x) => { x.open = x.open === 'color' ? null : 'color'; })}><span style={{ background: f.eventColor || '#07f' }} />⌄</button>
         </div>
-        {f.open === 'color' && <div className="design-color-menu">{['#07f','#8e55ea','#e64646','#ff9500','#18a058','#00a1a6','#ffcf33','#f06292'].map((color) => <button key={color} aria-label={'Цвет '+color} style={{background:color}} onClick={() => A.set((x) => { x.open = null; })} />)}</div>}
+        {f.open === 'color' && <div className="design-color-menu">{['#07f','#8e55ea','#e64646','#ff9500','#18a058','#00a1a6','#ffcf33','#f06292'].map((color) => <button key={color} aria-label={'Цвет '+color} style={{background:color}} onClick={() => A.set((x) => { x.eventColor = color; x.open = null; })} />)}</div>}
         <div className="design-content">{body}</div>
         <div className="design-footer">
           <Button size="m" mode="primary" className={anna ? 'annabtn' : ''} onClick={A.send}>{n ? `Отправить приглашения (${n})` : 'Сохранить'}</Button>
