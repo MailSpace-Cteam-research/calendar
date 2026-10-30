@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Accordion, Avatar, Button, Card, ChipsSelect, CustomSelect, CustomSelectOption, Footnote, IconButton, SimpleCell,
+  Accordion, Avatar, Button, Card, Checkbox, ChipsSelect, CustomSelect, CustomSelectOption, Footnote, IconButton, SimpleCell,
   Input, Link, MiniInfoCell, Radio, SegmentedControl, Tappable, Text,
 } from '@vkontakte/vkui';
 import { Chip } from '@vkontakte/vkui';
