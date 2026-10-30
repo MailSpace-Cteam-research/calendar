@@ -358,3 +358,18 @@
 .fg-mode-ai-applied.fg-participants-expanded .fg-member-list { gap: 0; }
 .fg-availability-toggle[aria-expanded=true] span { display: none; }
 .fg-mode-ai-applied .fg-availability-toggle { width: 100%; }
+
+/* Room picker lives in a React portal so Figma's rounded event card cannot clip it. */
+.fg-room-menu.fg-room-portal {
+  position: fixed;
+  z-index: 9999;
+  width: 280px;
+  height: auto;
+  max-height: 252px;
+  overflow-y: auto;
+  background: var(--vkui--color_background_content);
+  color: var(--vkui--color_text_primary);
+  font-family: var(--vkui--font_family_base);
+  top: auto;
+  bottom: auto;
+}
