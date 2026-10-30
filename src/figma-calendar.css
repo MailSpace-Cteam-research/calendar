@@ -181,114 +181,86 @@
 .fg-toast { position: fixed; z-index: 10000; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--vkui--color_background_contrast); color: var(--vkui--color_text_contrast); padding: 12px 16px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,16,61,.2); }
 @media (max-width: 600px) { .fg-page { padding: 8px 0; } .fg-frame-scroll { border-radius: 0; } .fg-demo-tools { padding: 4px 12px; align-items: flex-start; flex-direction: column; } }
 
-/* Reference pill widths: 103 / 97 / 122, then 98 / 146 (420×400 modal). */
-.fg-mode-event .fg-form-pills, .fg-mode-ai-compose .fg-form-pills, .fg-mode-ai-wait .fg-form-pills { height:90px; min-height:90px; }
-.fg-form-pills .fg-pill:nth-child(1) { width:103px; min-width:103px; }
-.fg-form-pills .fg-pill:nth-child(2) { width:97px; min-width:97px; }
-.fg-form-pills .fg-pill:nth-child(3) { width:122px; min-width:122px; }
-.fg-form-pills .fg-pill:nth-child(4) { width:98px; min-width:98px; }
-.fg-form-pills .fg-pill:nth-child(5) { width:146px; min-width:146px; }
-.fg-form-pills .fg-pill { gap:0; }
-.fg-form-pills .fg-pill .vkuiButton__content { width:100%; justify-content:center; gap:6px; font-size:15px; white-space:nowrap; }
-.fg-waiting { min-height:286px; }
-.fg-mode-ai-done .fg-form-heading { height:auto; min-height:98px; align-items:flex-start; }
-.fg-mode-ai-done .fg-palette-anchor { align-self:flex-start; margin-top:5px; }
-.fg-form-title.fg-title-multiline textarea { width:100%; min-height:64px; height:64px; border:0; background:transparent; padding:4px 12px !important; font-size:24px; font-weight:500; line-height:28px; resize:none; outline:none; }
 
-/* UI audit: Figma AI states 96:39704 / 96:39868 / 96:40018 / 96:40102. */
-.fg-demo-buttons .fg-example-prompts { display:flex; align-items:center; gap:3px; border-left:1px solid var(--fg-border); padding-left:8px; }
-.fg-demo-buttons .fg-example-prompts .vkuiButton { color:var(--vkui--color_text_secondary); font-size:12px; padding-inline:7px; }
-.fg-ai-entry.fg-ai-back { color:var(--fg-icon); }
-.fg-ai-entry.fg-ai-back > span:not(.vkuiTappable__stateLayer) { color:var(--fg-icon); }
-.fg-event-form.fg-mode-ai-compose,
-.fg-event-form.fg-mode-ai-wait { height:489px; }
-.fg-mode-ai-compose .fg-card-inner { height:286px; }
-.fg-mode-ai-compose .fg-waiting { height:286px; min-height:286px; opacity:.33; }
-.fg-mode-ai-compose .fg-ai-panel { height:143px; }
-.fg-mode-ai-compose .fg-ai-text { background:transparent; }
-.fg-mode-ai-compose .fg-ai-text textarea { padding:4px 10px!important; border:0; min-height:65px; }
-.fg-mode-ai-compose .fg-ai-text .vkuiFormField__border { display:none; }
-.fg-mode-ai-compose .fg-ai-bottom .vkuiIconButton { border-radius:50%; }
-.fg-mode-ai-wait .fg-ai-panel { height:84px; padding:20px 28px; }
-.fg-mode-ai-wait .fg-loading-card { height:345px; overflow:hidden; }
-.fg-wait-skeleton { height:345px; display:flex; flex-direction:column; color:var(--fg-muted); }
-.fg-wait-skeleton .fg-wait-title { flex:none; height:68px; gap:12px; }
-.fg-wait-skeleton .fg-wait-title > .vkuiText { flex:1; padding-left:12px; font-size:24px; line-height:28px; font-weight:500; color:var(--fg-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.fg-wait-skeleton .fg-wait-title > .fg-row-icon { width:20px; margin-left:8px; flex:0 0 20px; opacity:.65; }
-.fg-wait-palette { height:26px; width:48px; flex:none; display:flex; align-items:center; justify-content:center; gap:4px; color:var(--fg-icon); }
-.fg-wait-palette .fg-event-dot { opacity:1; }
-.fg-wait-lines { flex:1; }
-.fg-wait-row { height:36px; gap:12px; }
-.fg-wait-row .fg-row-icon { opacity:.46; display:flex; align-items:center; }
-.fg-skeleton-bar { display:block; height:18px; flex:1; max-width:312px; border-radius:8px; background:var(--vkui--color_background_secondary); }
-.fg-wait-pills { opacity:.35; pointer-events:none; }
-.fg-mode-ai-wait .fg-ai-message { overflow:hidden; font-size:15px; line-height:20px; overflow-wrap:anywhere; }
-.fg-mode-ai-done .fg-ai-panel { height:56px; }
-.fg-mode-ai-done .fg-ai-success > .vkuiIcon { color:var(--vkui--color_icon_positive, #00a86b); }
-.fg-mode-ai-done .fg-ai-success .vkuiButton { color:var(--fg-icon); }
-.fg-mode-ai-done { height:648px; }
-.fg-mode-ai-done .fg-card-inner { height:532px; display:flex; flex-direction:column; }
-.fg-mode-ai-done .fg-event-content { flex:1; height:100%; min-height:0; }
-.fg-mode-ai-done .fg-form-heading { flex:0 0 98px; height:98px; min-height:98px; }
-.fg-mode-ai-done .fg-form-fields { flex:1 1 auto; min-height:0; }
-.fg-mode-ai-done .fg-form-footer { flex:0 0 80px; height:80px; }
-.fg-mode-ai-done .fg-form-pills { min-height:90px; height:90px; }
-.fg-mode-ai-done.fg-participants-expanded { height:810px; top:4px; }
-.fg-mode-ai-done.fg-participants-expanded .fg-card-inner { height:694px; }
-.fg-member-content { position:relative; }
-.fg-member-header .fg-member-tools .vkuiIconButton { color:var(--fg-icon); }
-.fg-member-list { gap:0; padding-top:0; }
-.fg-member-item { min-height:36px; height:36px; }
-.fg-member-item .vkuiAvatar { flex:0 0 24px; }
-.fg-member-collapse { position:absolute!important; top:0; right:0; z-index:2; margin-top:0!important; color:var(--fg-accent)!important; }
-.fg-member-add { min-height:32px; height:32px; margin-top:2px; }
-.fg-form-pills .fg-pill.fg-pill-repeat { width:103px; min-width:103px; }
-.fg-form-pills .fg-pill.fg-pill-place { width:97px; min-width:97px; }
-.fg-form-pills .fg-pill.fg-pill-description { width:122px; min-width:122px; }
-.fg-form-pills .fg-pill.fg-pill-files { width:98px; min-width:98px; }
-.fg-form-pills .fg-pill.fg-pill-notify { width:146px; min-width:146px; }
-.fg-form-pills .fg-pill .vkuiButton__in { gap:6px; width:100%; justify-content:center; }
-.fg-form-pills .fg-pill .vkuiButton__before { padding:0!important; flex:0 0 20px; }
-.fg-form-pills .fg-pill .vkuiButton__content { width:auto; flex:0 0 auto; padding:0!important; white-space:nowrap; overflow:visible; }
-.fg-mode-ai-done .fg-form-title.fg-title-multiline textarea { line-height:28px; color:var(--fg-text); }
-.fg-call-filled a { text-overflow:ellipsis; }
-.fg-mode-ai-done .fg-form-footer .fg-cal-button { background:var(--fg-content); }
-@media (max-width:900px) {
-  .fg-event-form.fg-mode-ai-done.fg-participants-expanded { top:4px; max-height:calc(100% - 8px); }
-  .fg-event-form.fg-mode-ai-done.fg-participants-expanded .fg-card-inner { min-height:0; overflow-y:auto; scrollbar-width:thin; }
-  .fg-demo-buttons .fg-example-prompts { flex-wrap:wrap; }
+/* Exact Figma states: 96:39656, 96:39704, 96:39868, 96:40018 and 96:40102. */
+.fg-page { -webkit-font-smoothing: antialiased; }
+.fg-ai-entry, .fg-ai-entry:focus, .fg-ai-entry:active { background: transparent !important; box-shadow: none !important; }
+.fg-ai-entry [class*="stateLayer"], .fg-ai-entry::before, .fg-ai-entry::after { background: transparent !important; box-shadow: none !important; }
+.fg-ai-entry.fg-ai-back, .fg-ai-entry.fg-ai-back span { color: var(--vkui--color_icon_secondary) !important; }
+.fg-form-title input, .fg-title-multiline textarea {
+  font-family: var(--vkui--font_family_accent, var(--vkui--font_family_base)) !important;
+  font-size: 24px !important; font-weight: 500 !important; line-height: 28px !important;
 }
-
-/* UI audit pass 2: VKUI 8 generated class names. */
+.fg-form-title.fg-title-multiline, .fg-description, .fg-ai-text {
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+}
+.fg-form-title.fg-title-multiline textarea {
+  box-sizing: border-box; width: 100%; min-height: 64px; height: 64px; resize: none;
+  padding: 4px 12px !important; outline: none; background: transparent !important;
+}
+.fg-title-multiline .vkuiFormField__border,
+.fg-description .vkuiFormField__border, .fg-ai-text .vkuiFormField__border { display: none !important; }
+.fg-description textarea, .fg-ai-text textarea { border: 0 !important; outline: none; background: transparent !important; }
+/* The Kit/Add-pill text is Regular 15/20, not VKUI button's default medium. */
+.fg-form-pills { gap: 6px; padding-top: 16px; align-content: flex-start; }
+.fg-form-pills .fg-pill { min-height: 34px; height: 34px; font-size: 15px; font-weight: 400 !important; }
+.fg-form-pills .fg-pill .vkuiButton__in { width: 100%; gap: 6px; justify-content: flex-start; }
+.fg-form-pills .fg-pill .vkuiButton__before { padding: 0 !important; flex: 0 0 20px; }
+.fg-form-pills .fg-pill .vkuiButton__content { width: auto; padding: 0 !important; white-space: nowrap; overflow: visible; font-size: 15px; font-weight: 400 !important; }
+.fg-pill-repeat { width: 103px; min-width: 103px; }
+.fg-pill-place { width: 97px; min-width: 97px; }
+.fg-pill-description { width: 122px; min-width: 122px; }
+.fg-pill-files { width: 98px; min-width: 98px; }
+.fg-pill-notify { width: 146px; min-width: 146px; }
+.fg-form-footer .fg-save { width: 110px; min-width: 110px; max-width: 110px; padding-inline: 10px !important; }
+.fg-form-footer .fg-save .vkuiButton__content { font-family: var(--vkui--font_family_base) !important; font-weight: 500 !important; white-space: nowrap; overflow: visible; }
+.fg-form-footer .fg-cal-button { width: 153px; min-width: 153px; background: var(--fg-content); padding-inline: 8px; }
+.fg-member-content { position: relative; }
+.fg-member-list { gap: 0; padding-top: 0; }
+.fg-member-item { min-height: 36px; height: 36px; }
+.fg-member-item .vkuiAvatar { flex: 0 0 24px; }
+.fg-member-collapse { position: absolute !important; right: 0; top: 0; margin-top: 0 !important; z-index: 1; color: var(--fg-accent) !important; }
+.fg-member-add { min-height: 32px; height: 32px; margin-top: 2px; }
+.fg-call-filled a { max-width: 233px; text-overflow: ellipsis; }
+.fg-ai-success > .vkuiIcon { color: var(--vkui--color_icon_positive); }
+.fg-ai-success .vkuiButton, .fg-ai-success .vkuiButton .vkuiIcon { color: var(--fg-icon) !important; }
+.fg-mode-ai-compose, .fg-mode-ai-wait { height: 489px; }
+.fg-mode-ai-compose .fg-ai-panel { height: 143px; }
+.fg-mode-ai-compose .fg-ai-text textarea { padding: 4px 16px !important; min-height: 65px; }
+.fg-mode-ai-compose .fg-ai-bottom > button:first-child { width: 36px; min-width: 36px; height: 36px; border-radius: 50%; background: var(--fg-subtle); color: var(--fg-text); }
+.fg-mode-ai-compose .fg-card-inner { height: 286px; }
+.fg-mode-ai-compose .fg-waiting { height: 286px; min-height: 286px; opacity: .57; }
+.fg-mode-ai-compose .fg-waiting .fg-form-title input { opacity: 1 !important; }
+.fg-mode-ai-compose .fg-form-footer, .fg-mode-ai-wait .fg-form-footer { display: none; }
+.fg-mode-ai-compose .fg-form-pills, .fg-mode-ai-wait .fg-form-pills { height: 90px; min-height: 90px; }
+.fg-mode-ai-wait .fg-ai-panel { height: 84px; padding: 20px 28px; }
+.fg-mode-ai-wait .fg-loading-card { height: 345px; overflow: hidden; }
+.fg-wait-skeleton { height: 345px; display: flex; flex-direction: column; color: var(--fg-muted); }
+.fg-wait-skeleton .fg-wait-title { height: 68px; min-height: 68px; gap: 12px; }
 .fg-wait-skeleton .fg-wait-title > span:not(.fg-event-dot) {
-  flex:1 1 auto; min-width:0; padding-left:12px;
-  font-family:var(--vkui--font_family_base); font-size:24px; font-weight:500;
-  line-height:28px; color:var(--fg-muted); white-space:nowrap;
-  overflow:hidden; text-overflow:ellipsis;
+  flex: 1; min-width: 0; padding-left: 12px; font-family: var(--vkui--font_family_accent,var(--vkui--font_family_base));
+  font-size: 24px; font-weight: 500; line-height: 28px; color: var(--fg-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.fg-title-multiline > .vkuiFormField__border,
-.fg-description > .vkuiFormField__border,
-.fg-ai-text > .vkuiFormField__border { display:none!important; }
-.fg-title-multiline, .fg-description, .fg-ai-text {
-  background:transparent!important; border:0!important; box-shadow:none!important;
+.fg-wait-skeleton .fg-wait-title > .fg-row-icon { margin-left: 8px; flex: 0 0 20px; opacity: .65; }
+.fg-wait-palette { display: flex; gap: 4px; width: 48px; height: 26px; flex: 0 0 48px; align-items: center; justify-content: center; color: var(--fg-icon); }
+.fg-wait-row { height: 36px; gap: 12px; }
+.fg-wait-row .fg-row-icon { opacity: .46; display: flex; align-items: center; }
+.fg-skeleton-bar { display: block; height: 18px; flex: 1; max-width: 312px; margin-left: 8px; border-radius: 8px; background: var(--vkui--color_background_secondary); }
+.fg-wait-pills { opacity: .35; pointer-events: none; }
+.fg-mode-ai-done { height: 648px; }
+.fg-mode-ai-done .fg-ai-panel { height: 56px; }
+.fg-mode-ai-done .fg-card-inner { height: 532px; display: flex; flex-direction: column; }
+.fg-mode-ai-done .fg-event-content { min-height: 0; height: 100%; flex: 1; }
+.fg-mode-ai-done .fg-form-heading { height: 98px; flex: 0 0 98px; min-height: 98px; align-items: flex-start; }
+.fg-mode-ai-done .fg-palette-anchor { align-self: flex-start; margin-top: 5px; }
+.fg-mode-ai-done .fg-form-fields { min-height: 0; flex: 1 1 auto; }
+.fg-mode-ai-done .fg-form-footer { height: 80px; flex: 0 0 80px; }
+.fg-mode-ai-done .fg-form-pills { height: 90px; min-height: 90px; }
+.fg-mode-ai-done.fg-participants-expanded { height: 810px; top: -8px; }
+.fg-mode-ai-done.fg-participants-expanded .fg-card-inner { height: 694px; }
+@media (max-width: 900px) {
+  .fg-mode-ai-done.fg-participants-expanded { max-height: calc(100% - 8px); }
+  .fg-mode-ai-done.fg-participants-expanded .fg-card-inner { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .fg-demo-buttons .fg-example-prompts { flex-wrap: wrap; }
 }
-.fg-title-multiline textarea, .fg-description textarea, .fg-ai-text textarea {
-  background:transparent!important; border:0!important; box-shadow:none!important; outline:none;
-}
-.fg-mode-ai-done .fg-ai-success button,
-.fg-mode-ai-done .fg-ai-success button .vkuiIcon { color:var(--fg-icon)!important; }
-.fg-form-footer .fg-save { width:110px; min-width:110px; max-width:110px; padding-inline:10px!important; }
-.fg-form-footer .fg-save .vkuiButton__content { width:auto; overflow:visible; white-space:nowrap; }
-.fg-mode-ai-done .fg-form-title.fg-title-multiline .vkuiFormField__scrollContainer,
-.fg-description .vkuiFormField__scrollContainer { border:0!important; }
-/* Figma attachment action 36px circle. */
-.fg-mode-ai-compose .fg-ai-bottom > button:first-child {
-  width:36px; min-width:36px; height:36px; border-radius:50%;
-  background:var(--fg-subtle); color:var(--fg-text);
-}
-.fg-mode-ai-compose .fg-ai-bottom > button:first-child:hover {
-  background:var(--vkui--color_transparent--hover,rgba(0,16,61,.08));
-}
-
-/* Ensure 810px expanded AI form fits within the 820px Figma calendar frame. */
-.fg-event-form.fg-mode-ai-done.fg-participants-expanded { top:-8px; }
