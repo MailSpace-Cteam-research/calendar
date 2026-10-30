@@ -101,14 +101,52 @@ function People({ f, A }: { f: Form; A: FormActions }) {
   );
 }
 
+function ParticipantList({ f, A }: { f: Form; A: FormActions }) {
+  const people = [...f.people, ...f.ext];
+  const visible = f.participantsExpanded ? people : people.slice(0, 3);
+  const remaining = Math.max(0, people.length - visible.length);
+  return (
+    <div className="participant-list">
+      <div className="participant-row organizer-row">
+        <Avatar size={24} initials="Я" gradientColor={1} />
+        <div className="participant-copy">
+          <Text>Вы</Text>
+          <Footnote className="muted">организатор</Footnote>
+        </div>
+      </div>
+      {visible.map((name) => (
+        <div className="participant-row" key={name}>
+          <Avatar size={24} initials={name.slice(0, 1).toUpperCase()} gradientColor={grad(name)} />
+          <Text className="participant-name">{name}</Text>
+        </div>
+      ))}
+      {remaining > 0 && (
+        <Button size="s" mode="tertiary" className="participant-toggle"
+          onClick={() => A.set((x) => { x.participantsExpanded = true; })}>
+          Ещё {remaining} {plural(remaining)}
+        </Button>
+      )}
+      {f.participantsExpanded && people.length > 3 && (
+        <Button size="s" mode="tertiary" className="participant-toggle"
+          onClick={() => A.set((x) => { x.participantsExpanded = false; })}>
+          Свернуть
+        </Button>
+      )}
+      <Button size="s" mode="secondary" before={<Icon16Add />}
+        onClick={() => A.set((x) => { x.peopleOpen = !x.peopleOpen; })}>
+        {f.peopleOpen ? 'Скрыть добавление' : 'Добавить участников'}
+      </Button>
+      {f.peopleOpen && <People f={f} A={A} />}
+      {people.length > 0 && <Footnote className="links"><Link>Права участников</Link><Link>Написать всем</Link><Link>Копировать список</Link></Footnote>}
+    </div>
+  );
+}
+
 type Blk = { k: string; icon: React.ReactNode; name: string; me?: boolean; on: (f: Form) => boolean; sum: (f: Form) => string; body: (f: Form, A: FormActions) => React.ReactNode };
 const BLOCKS: Blk[] = [
   { k: 'people', icon: <Icon20UsersOutline />, name: 'Участники', on: (f) => f.people.length + f.ext.length > 0 || !!f.peopleOpen,
     sum: (f) => { const n = f.people.length + f.ext.length; if (!n) return 'Пока никого'; const bn = busyNames(f, f.d, f.s, f.s + f.len); return `${n} ${plural(n)} · ${bn.length ? `заняты: ${bn.join(', ')}` : f.people.length ? 'все свободны' : 'нет данных о занятости'}`; },
-    body: (f, A) => (<>
-      <People f={f} A={A} />
-      <Footnote className="links"><Link>Права участников</Link><Link>Написать всем</Link><Link>Копировать список</Link></Footnote>
-    </>) },
+    body: (f, A) => <ParticipantList f={f} A={A} /> },
   { k: 'room', icon: <Icon20BuildingOutline />, name: 'Переговорка', on: (f) => !!f.room,
     sum: (f) => { const r = roomBy(f.room)!; return `${r.n}, ${r.fl} · ${r.cap} мест${f.roomAuto ? ' · подобрана' : ''}`; },
     body: (f, A) => (<>
@@ -176,11 +214,13 @@ export function EventForm({ f, cal, sl, delegated, A }: { f: Form; cal: Ev[]; sl
         <IconButton label={pop ? 'Развернуть в сайдбар' : 'Свернуть'} onClick={pop ? A.grow : A.shrink}>{pop ? <Icon20FullscreenOutline /> : <Icon20FullscreenExitOutline />}</IconButton>
         <IconButton label="Закрыть" onClick={A.close}><Icon20Cancel /></IconButton>
       </div>
-      <TimeBlock f={f} cal={cal} sl={sl} A={A} />
-      {body}
-      {avail.length > 0 && (
-        <div className="adds">{avail.map(([k, t]) => <Button key={k} size="s" mode="secondary" before={<Icon16Add />} onClick={() => A.addBlock(k)}>{t}</Button>)}</div>
-      )}
+      <div className="form-content">
+        <TimeBlock f={f} cal={cal} sl={sl} A={A} />
+        {body}
+        {avail.length > 0 && (
+          <div className="adds">{avail.map(([k, t]) => <Button key={k} size="s" mode="secondary" before={<Icon16Add />} onClick={() => A.addBlock(k)}>{t}</Button>)}</div>
+        )}
+      </div>
       <div className="foot">
         <Button size={pop ? 'm' : 'l'} mode="primary" className={anna ? 'annabtn' : ''} onClick={A.send}>
           {n ? `${anna ? 'Отправить от имени Анны' : 'Отправить приглашения'} (${n})` : 'Сохранить'}
