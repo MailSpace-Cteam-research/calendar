@@ -101,12 +101,13 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     setDay(d); setFrom(start); setTo(start + 30); setTitle(''); setPeople([]);
     setDescription(''); setCallLink(''); setScreen('event'); setShowForm(true);
     setRepeat(false); setPlace(false); setFiles(false); setNotify(false); setParticipantsExpanded(false);
+    setPeopleQuery(''); setPaletteOpen(false); setCalOpen(false); setAllDay(false); setColour(COLORS[0]); setCalendar('me');
   };
   const startAI = (example = AI_DEFAULT) => {
     window.clearTimeout(aiTimer.current);
     window.clearTimeout(thinkingTimer.current);
     setScreen('ai-compose'); setShowForm(true); setAiPrompt(example);
-    setSubmittedPrompt(''); setThinkingLabel('Думаю...');
+    setSubmittedPrompt(''); setThinkingLabel('Думаю...'); setPaletteOpen(false); setCalOpen(false);
   };
   const fillAI = () => {
     const prompt = aiPrompt.trim();
@@ -133,7 +134,8 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     window.clearTimeout(aiTimer.current);
     window.clearTimeout(thinkingTimer.current);
     setTitle(''); setPeople([]); setParticipantsExpanded(false);
-    setCallLink(''); setDescription('');
+    setCallLink(''); setDescription(''); setPeopleQuery('');
+    setFrom(600); setTo(630); setTimeStartDraft(null); setTimeEndDraft(null);
     setScreen('ai-compose');
   };
   const leaveAI = () => {
@@ -217,7 +219,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
                 {participantsExpanded ? <>
                   <Button mode="tertiary" className="fg-member-collapse" onClick={() => setParticipantsExpanded(false)}>Свернуть</Button>
                   <div className="fg-member-list">{people.map((p, i) => <div key={i} className="fg-member-item">
-                    <Avatar size={24} initials={p.initials} gradientColor={(i % 6 + 1) as 1 | 2 | 3 | 4 | 5 | 6}/>
+                    <Avatar size={24} initials={p.initials} alt={p.name} gradientColor={(i % 6 + 1) as 1 | 2 | 3 | 4 | 5 | 6}/>
                     <span>{p.name}{p.role && <span className="fg-muted"> {p.role}</span>}</span>
                   </div>)}</div>
                   <Button mode="tertiary" className="fg-member-add" before={<Icon20AddFallback />} onClick={() => setPeopleQuery(' ')}>Добавить</Button>
@@ -237,7 +239,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
               onChange={e => setPeopleQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && peopleQuery.trim()) { setPeople([{name:peopleQuery.trim(), initials:peopleQuery.slice(0, 2)}]);setPeopleQuery(''); } }} />
           </div>}
         <div className="fg-form-row fg-video-row"><Icon20VideocamOutline className="fg-row-icon" />
-          {callLink ? <div className="fg-call-filled"><a href={callLink} target="_blank" rel="noreferrer">{callLink}</a>
+          {callLink ? <div className="fg-call-filled"><a href={callLink} target="_blank" rel="noreferrer" title={callLink}>{callLink.startsWith('https://calls.mail.ru/room/') ? 'https://calls.mail.ru/room/36894...' : callLink}</a>
             <IconButton label="Копировать ссылку" onClick={() => { navigator.clipboard?.writeText(callLink); alert('Ссылка скопирована'); }}><Icon20CopyOutline /></IconButton>
             <IconButton label="Удалить видеовстречу" onClick={() => setCallLink('')}><Icon20Cancel /></IconButton></div>
           : <Input mode="plain" className="fg-simple-input" disabled={disabled} value={callLink}
