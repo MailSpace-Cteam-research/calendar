@@ -350,3 +350,11 @@
 .fg-mode-ai-applied .fg-palette-anchor { margin-top: 0; }
 .fg-mode-ai-applied .fg-room-anchor .vkuiButton { background: transparent; }
 .fg-mode-ai-applied .fg-room-menu { width: 280px; max-height: 240px; }
+/* Fix audit: expanded attendee rows must use Figma's 32px rhythm, not 36px.
+   Otherwise the notification pill overlaps the fixed save footer. */
+.fg-mode-ai-applied.fg-participants-expanded .fg-free-slots { display: none; }
+.fg-mode-ai-applied.fg-participants-expanded .fg-member-row { padding-top: 0; }
+.fg-mode-ai-applied.fg-participants-expanded .fg-member-item { height: 32px; min-height: 32px; }
+.fg-mode-ai-applied.fg-participants-expanded .fg-member-list { gap: 0; }
+.fg-availability-toggle[aria-expanded=true] span { display: none; }
+.fg-mode-ai-applied .fg-availability-toggle { width: 100%; }
