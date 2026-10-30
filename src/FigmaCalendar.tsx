@@ -354,7 +354,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           </div>
           {showForm && <div className={'fg-event-form fg-mode-'+screen+(participantsExpanded && aiDone ? ' fg-participants-expanded' : '')} data-testid="event-form">
             <div className="fg-event-head">
-              {compact ? <Tappable className="fg-ai-entry" onClick={startAI}><Icon20Stars /><span>Заполнить с нейропомощником</span></Tappable>
+              {compact ? <Tappable className="fg-ai-entry" onClick={() => startAI()}><Icon20Stars /><span>Заполнить с нейропомощником</span></Tappable>
               : <Tappable className="fg-ai-entry fg-ai-back" onClick={leaveAI}><Icon20ChevronLeftOutline /><span>Нейропомощник</span></Tappable>}
               <IconButton label="Закрыть форму" className="fg-form-close" onClick={()=>setShowForm(false)}><Icon20Cancel /></IconButton>
             </div>
