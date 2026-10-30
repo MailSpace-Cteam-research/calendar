@@ -9,6 +9,8 @@ import {
   Icon20ChevronRightOutline, Icon20ClockOutline, Icon20NotificationOutline,
   Icon20RefreshOutline, Icon20SmileOutline, Icon20Stars, Icon20UsersOutline,
   Icon20VideocamOutline, Icon20PollOutline, Icon20PlaceOutline,
+  Icon20MailOutline, Icon20MoreHorizontal, Icon20CopyOutline,
+  Icon20ArrowUturnLeftOutline, Icon20CheckCircleOutline,
 } from '@vkontakte/icons';
 import './figma-calendar.css';
 
@@ -41,6 +43,9 @@ const FAKE_PEOPLE: Person[] = [
   { name: 'Алиса Лобачевская', initials: 'АЛ' },
 ];
 const AI_DEFAULT = '1:1 с дизайнером';
+const AI_JIRA_REQUEST = 'Синк с разработкой и продуктом по jira.vk.team/browse/SP-30329';
+const AI_EXAMPLES = [AI_DEFAULT, 'Синк с командой', 'Квартальная встреча', AI_JIRA_REQUEST] as const;
+
 const AI_RESULT_TITLE = 'Синк по задаче БАЗ файлы в блоке квоты';
 const AI_RESULT_DESCRIPTION = 'Привет, хочу обсудить:\n1. Дизайн и изменения\n2. Эксперимент и ресурс разработки';
 const dateOptions = ['Пн, 6 окт.', 'Вт, 7 окт.', 'Ср, 8 окт.', 'Чт, 9 окт.', 'Пт, 10 окт.', 'Сб, 11 окт.', 'Вс, 12 окт.'];
@@ -54,6 +59,11 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const [to, setTo] = useState(630);
   const [title, setTitle] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
+  const [submittedPrompt, setSubmittedPrompt] = useState('');
+  const [thinkingLabel, setThinkingLabel] = useState<'Думаю...' | 'Верчу извилинами...'>('Думаю...');
+  const [timeStartDraft, setTimeStartDraft] = useState<string | null>(null);
+  const [timeEndDraft, setTimeEndDraft] = useState<string | null>(null);
+
   const [colour, setColour] = useState(COLORS[0]);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [allDay, setAllDay] = useState(false);
@@ -73,29 +83,73 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const [toast, setToast] = useState('');
   const weekScroll = useRef<HTMLDivElement>(null);
   const aiTimer = useRef<number | undefined>(undefined);
+  const thinkingTimer = useRef<number | undefined>(undefined);
   useEffect(() => {
     if (weekScroll.current) weekScroll.current.scrollTop = 168; // 9:00 at top: matches original calendar prototype
-    return () => window.clearTimeout(aiTimer.current);
+    return () => {
+      window.clearTimeout(aiTimer.current);
+      window.clearTimeout(thinkingTimer.current);
+    };
   }, []);
   const alert = (s: string) => { setToast(s); window.setTimeout(() => setToast(''), 3200); };
   const resetForm = (d = 1, start = 600) => {
+    window.clearTimeout(aiTimer.current);
+    window.clearTimeout(thinkingTimer.current);
+    setTimeStartDraft(null); setTimeEndDraft(null);
+    setAiPrompt(''); setSubmittedPrompt(''); setThinkingLabel('Думаю...');
     setDay(d); setFrom(start); setTo(start + 30); setTitle(''); setPeople([]);
     setDescription(''); setCallLink(''); setScreen('event'); setShowForm(true);
     setRepeat(false); setPlace(false); setFiles(false); setNotify(false); setParticipantsExpanded(false);
   };
-  const startAI = () => { setScreen('ai-compose'); setAiPrompt(AI_DEFAULT); };
+  const startAI = (example = AI_DEFAULT) => {
+    window.clearTimeout(aiTimer.current);
+    window.clearTimeout(thinkingTimer.current);
+    setScreen('ai-compose'); setShowForm(true); setAiPrompt(example);
+    setSubmittedPrompt(''); setThinkingLabel('Думаю...');
+  };
   const fillAI = () => {
+    const prompt = aiPrompt.trim();
+    if (!prompt) return;
+    setSubmittedPrompt(prompt);
+    setThinkingLabel('Думаю...');
     setScreen('ai-wait');
+    window.clearTimeout(aiTimer.current);
+    window.clearTimeout(thinkingTimer.current);
+    thinkingTimer.current = window.setTimeout(() => setThinkingLabel('Верчу извилинами...'), 850);
     aiTimer.current = window.setTimeout(() => {
-      setTitle(AI_RESULT_TITLE);
+      const jira = /jira\.vk\.team|SP-30329/i.test(prompt);
+      const title = jira ? AI_RESULT_TITLE : /1:1/i.test(prompt) ? '1:1 с дизайнером' : /квартальн/i.test(prompt) ? 'Квартальная встреча' : /синк/i.test(prompt) ? 'Синк с командой' : prompt;
+      setTitle(title);
       setDay(1); setFrom(720); setTo(750);
+      setTimeStartDraft(null); setTimeEndDraft(null);
       setPeople(FAKE_PEOPLE); setParticipantsExpanded(false);
       setCallLink('https://calls.mail.ru/room/36894w9a');
       setDescription(AI_RESULT_DESCRIPTION);
       setScreen('ai-done');
-    }, 1050);
+    }, 2100);
   };
-  const undoAI = () => { resetForm(); setScreen('event'); };
+  const undoAI = () => {
+    window.clearTimeout(aiTimer.current);
+    window.clearTimeout(thinkingTimer.current);
+    setTitle(''); setPeople([]); setParticipantsExpanded(false);
+    setCallLink(''); setDescription('');
+    setScreen('ai-compose');
+  };
+  const leaveAI = () => {
+    window.clearTimeout(aiTimer.current);
+    window.clearTimeout(thinkingTimer.current);
+    setScreen('event'); setSubmittedPrompt('');
+  };
+  const commitTime = (value: string | null, which: 'start' | 'end') => {
+    if (value == null) return;
+    const minutes = toMins(value.trim());
+    if (Number.isFinite(minutes) && minutes >= 0 && minutes < 24 * 60) {
+      if (which === 'start') setFrom(minutes);
+      else setTo(minutes);
+    }
+    if (which === 'start') setTimeStartDraft(null);
+    else setTimeEndDraft(null);
+  };
   const save = () => {
     if (!title.trim()) { alert('Добавьте название события'); return; }
     setSavedEvents(e => [...e, { id: Date.now(), d: day, start: from, end: to, title }]);
@@ -104,11 +158,11 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const compact = screen === 'event';
   const isAI = screen !== 'event';
   const aiDone = screen === 'ai-done';
-  const aiBlocked = screen === 'ai-compose' || screen === 'ai-wait';
+  const aiBlocked = screen === 'ai-compose';
   const rows = [
     { k: 'repeat', label: 'Повтор', icon: <Icon20RefreshOutline />, enabled: repeat, set: setRepeat },
     { k: 'place', label: 'Место', icon: <Icon20BuildingOutline />, enabled: place, set: setPlace },
-    { k: 'description', label: 'Описание', icon: <Icon20ArticleBoxOutline />, enabled: !!description, set: (v: boolean) => setDescription(v ? '' : '') },
+    { k: 'description', label: 'Описание', icon: <Icon20ArticleBoxOutline />, enabled: !!description, set: (v: boolean) => setDescription(v ? 'Введите описание' : '') },
     { k: 'files', label: 'Файлы', icon: <Icon20Attach />, enabled: files, set: setFiles },
     { k: 'notify', label: 'Уведомления', icon: <Icon20NotificationOutline />, enabled: notify, set: setNotify },
   ];
@@ -138,11 +192,15 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           <div className="fg-time-controls">
             <CustomSelect className="fg-day-select" aria-label="Дата события" disabled={disabled} value={String(day)} mode="plain" icon={null}
               options={dateOptions.map((s, i) => ({ value: String(i), label: s }))} onChange={(_e, v) => setDay(Number(v))} />
-            <Input mode="plain" aria-label="Начало события" className="fg-time-input" disabled={disabled} value={toTime(from)}
-              onChange={e => { const v = toMins(e.target.value); if (Number.isFinite(v)) setFrom(v); }} />
+            <Input mode="plain" aria-label="Начало события" className="fg-time-input" disabled={disabled}
+              value={timeStartDraft ?? toTime(from)} onChange={e => setTimeStartDraft(e.target.value)}
+              onBlur={() => commitTime(timeStartDraft, 'start')}
+              onKeyDown={e => { if (e.key === 'Enter') (e.currentTarget as HTMLElement).blur(); }} />
             <span className="fg-time-dash">—</span>
-            <Input mode="plain" aria-label="Конец события" className="fg-time-input" disabled={disabled} value={toTime(to)}
-              onChange={e => { const v = toMins(e.target.value); if (Number.isFinite(v)) setTo(v); }} />
+            <Input mode="plain" aria-label="Конец события" className="fg-time-input" disabled={disabled}
+              value={timeEndDraft ?? toTime(to)} onChange={e => setTimeEndDraft(e.target.value)}
+              onBlur={() => commitTime(timeEndDraft, 'end')}
+              onKeyDown={e => { if (e.key === 'Enter') (e.currentTarget as HTMLElement).blur(); }} />
             <Checkbox className="fg-day-checkbox" disabled={disabled} checked={allDay} onChange={e => setAllDay(e.target.checked)}>Весь день</Checkbox>
           </div>
         </div>
@@ -150,18 +208,18 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           <div className="fg-member-section">
             <div className="fg-member-header">
               <Text weight="2">Участники {people.length}</Text>
-              <div className="fg-member-tools"><IconButton label="Написать участникам"><Icon20NotificationOutline /></IconButton>
-                <IconButton label="Дополнительные действия" onClick={() => alert('Параметры участников')}><Icon16Dropdown /></IconButton></div>
+              <div className="fg-member-tools"><IconButton label="Написать участникам" onClick={() => alert('Письмо участникам — демо')}><Icon20MailOutline /></IconButton>
+                <IconButton label="Дополнительные действия" onClick={() => alert('Параметры участников')}><Icon20MoreHorizontal /></IconButton></div>
             </div>
             <div className="fg-member-row"><Icon20UsersOutline className="fg-row-icon" />
               <div className="fg-member-content">
                 {participantsExpanded ? <>
+                  <Button mode="tertiary" className="fg-member-collapse" onClick={() => setParticipantsExpanded(false)}>Свернуть</Button>
                   <div className="fg-member-list">{people.map((p, i) => <div key={i} className="fg-member-item">
                     <Avatar size={24} initials={p.initials} gradientColor={(i % 6 + 1) as 1 | 2 | 3 | 4 | 5 | 6}/>
                     <span>{p.name}{p.role && <span className="fg-muted"> {p.role}</span>}</span>
                   </div>)}</div>
                   <Button mode="tertiary" className="fg-member-add" before={<Icon20AddFallback />} onClick={() => setPeopleQuery(' ')}>Добавить</Button>
-                  <Button mode="tertiary" className="fg-member-collapse" onClick={() => setParticipantsExpanded(false)}>Свернуть</Button>
                 </> : <>
                   <div className="fg-member-preview"><div className="fg-avatar-stack">
                     {people.slice(0, 3).map((p, i) => <Avatar key={i} size={24} initials={p.initials} gradientColor={(i % 6 + 1) as 1 | 2 | 3 | 4 | 5 | 6} />)}
@@ -179,7 +237,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           </div>}
         <div className="fg-form-row fg-video-row"><Icon20VideocamOutline className="fg-row-icon" />
           {callLink ? <div className="fg-call-filled"><a href={callLink} target="_blank" rel="noreferrer">{callLink}</a>
-            <IconButton label="Копировать ссылку" onClick={() => navigator.clipboard?.writeText(callLink)}><Icon20Attach /></IconButton>
+            <IconButton label="Копировать ссылку" onClick={() => { navigator.clipboard?.writeText(callLink); alert('Ссылка скопирована'); }}><Icon20CopyOutline /></IconButton>
             <IconButton label="Удалить видеовстречу" onClick={() => setCallLink('')}><Icon20Cancel /></IconButton></div>
           : <Input mode="plain" className="fg-simple-input" disabled={disabled} value={callLink}
             onChange={e => setCallLink(e.target.value)} placeholder="Ссылка на звонок" aria-label="Ссылка на звонок"/>}
@@ -191,7 +249,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
         {files && <SimpleCell className="fg-extra-line" before={<Icon20Attach />} onClick={() => alert('Файлы прикрепляются в демоверсии')}>Прикрепить файл</SimpleCell>}
         {notify && <SimpleCell className="fg-extra-line" before={<Icon20NotificationOutline />} onClick={() => setNotify(false)}>За 15 минут · убрать</SimpleCell>}
         <div className="fg-form-pills">
-          {pills.map(r => <Button key={r.k} mode="secondary" size="m" className="fg-pill" before={r.icon}
+          {pills.map(r => <Button key={r.k} mode="secondary" size="m" className={'fg-pill fg-pill-'+r.k} before={r.icon}
             disabled={disabled} onClick={() => { if(r.k==='description'){setDescription('Введите описание');} else r.set(!r.enabled); }}>{r.label}</Button>)}
         </div>
       </div>
@@ -206,12 +264,39 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     </div>
   );
 
+  const waitBody = (
+    <div className="fg-wait-skeleton" aria-live="polite" aria-busy="true">
+      <div className="fg-form-heading fg-wait-title">
+        <Icon20SmileOutline className="fg-row-icon" />
+        <Text>{thinkingLabel}</Text>
+        <div className="fg-wait-palette"><span className="fg-event-dot" style={{ backgroundColor: colour }} /><Icon16Dropdown /></div>
+      </div>
+      <div className="fg-form-fields fg-wait-lines">
+        {[
+          <Icon20ClockOutline />, <Icon20UsersOutline />, <Icon20VideocamOutline />,
+        ].map((icon, index) => <div className="fg-form-row fg-wait-row" key={index}>
+          <span className="fg-row-icon">{icon}</span><span className="fg-skeleton-bar" />
+        </div>)}
+        <div className="fg-form-pills fg-wait-pills">
+          {rows.map(r => <Button key={r.k} className={'fg-pill fg-pill-'+r.k} size="m" mode="secondary" disabled before={r.icon}>{r.label}</Button>)}
+        </div>
+      </div>
+    </div>
+  );
+  const submittedContent = submittedPrompt.split(/(https?:\/\/[^\s]+|jira\.vk\.team\/browse\/[\w-]+)/gi).map((piece, index) =>
+    /^https?:\/\/|^jira\.vk\.team\//i.test(piece)
+      ? <a key={index} href={piece.startsWith('http') ? piece : `https://${piece}`} target="_blank" rel="noreferrer">{piece}</a>
+      : <span key={index}>{piece}</span>
+  );
   return <div className="fg-page">
     <div className="fg-demo-tools"><Text weight="2">Календарь · Figma</Text>
       <div className="fg-demo-buttons"><Button mode="secondary" size="s" onClick={() => resetForm()}>Новая форма</Button>
       <Button mode="secondary" size="s" onClick={() => {resetForm();startAI();}}>Нейропомощник</Button>
       <Button mode="secondary" size="s" onClick={() => { resetForm();setTitle(AI_RESULT_TITLE);setFrom(720);setTo(750);setPeople(FAKE_PEOPLE);setCallLink('https://calls.mail.ru/room/36894w9a');setDescription(AI_RESULT_DESCRIPTION);setScreen('ai-done'); }}>После заполнения</Button>
-      <Button mode="tertiary" size="s" onClick={onLegacy}>Предыдущие сценарии</Button></div>
+      <Button mode="tertiary" size="s" onClick={onLegacy}>Предыдущие сценарии</Button>
+      <div className="fg-example-prompts" role="group" aria-label="Примеры запросов нейропомощнику">
+        {AI_EXAMPLES.map((ex, i) => <Button size="s" mode="tertiary" key={ex} onClick={() => startAI(ex)}>{['1:1', 'Синк', 'Квартальная встреча', 'Jira SP-30329'][i]}</Button>)}
+      </div></div>
     </div>
     <div className="fg-frame-scroll"><div className="fg-frame" data-testid="calendar-frame">
       <nav className="fg-nav" aria-label="Сервисы">
@@ -267,19 +352,19 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
               </div>
             </div>
           </div>
-          {showForm && <div className={'fg-event-form fg-mode-'+screen} data-testid="event-form">
+          {showForm && <div className={'fg-event-form fg-mode-'+screen+(participantsExpanded && aiDone ? ' fg-participants-expanded' : '')} data-testid="event-form">
             <div className="fg-event-head">
               {compact ? <Tappable className="fg-ai-entry" onClick={startAI}><Icon20Stars /><span>Заполнить с нейропомощником</span></Tappable>
-              : <Tappable className="fg-ai-entry fg-ai-back" onClick={()=>setScreen('event')}><Icon20ChevronLeftOutline /><span>Нейропомощник</span></Tappable>}
+              : <Tappable className="fg-ai-entry fg-ai-back" onClick={leaveAI}><Icon20ChevronLeftOutline /><span>Нейропомощник</span></Tappable>}
               <IconButton label="Закрыть форму" className="fg-form-close" onClick={()=>setShowForm(false)}><Icon20Cancel /></IconButton>
             </div>
             {isAI && <div className={'fg-ai-panel'+(aiDone?' fg-ai-completed':'')}>
-              {aiDone ? <div className="fg-ai-success"><Icon20CheckCircleOn /><span>Заполнил 4 поля</span><Button mode="tertiary" onClick={undoAI} before={<Icon20RefreshOutline />}>Отменить</Button></div>
+              {aiDone ? <div className="fg-ai-success"><Icon20CheckCircleOutline /><span>Заполнил 4 поля</span><Button mode="tertiary" onClick={undoAI} before={<Icon20ArrowUturnLeftOutline />}>Отменить</Button></div>
                 : screen==='ai-compose' ? <><Textarea aria-label="Запрос нейропомощнику" className="fg-ai-text" placeholder="1:1 с дизайнером" value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)} />
-                   <div className="fg-ai-bottom"><IconButton label="Прикрепить файл" onClick={()=>alert('Вложения в демонстрации')}><Icon20Attach /></IconButton><Button mode="primary" onClick={fillAI}>Заполнить</Button></div></>
-                : <div className="fg-ai-message">Синк с разработкой и продуктом по <a href="https://jira.vk.team/browse/SP-30329" target="_blank" rel="noreferrer">jira.vk.team/browse/SP-30329</a></div>}
+                   <div className="fg-ai-bottom"><IconButton label="Прикрепить файл" onClick={()=>alert('Вложения в демонстрации')}><Icon20Attach /></IconButton><Button mode="primary" disabled={!aiPrompt.trim()} onClick={fillAI}>Заполнить</Button></div></>
+                : <div className="fg-ai-message">{submittedContent}</div>}
             </div>}
-            <div className="fg-card-inner">{formBody(aiBlocked)}</div>
+            <div className={'fg-card-inner'+(screen==='ai-wait' ? ' fg-loading-card' : '')}>{screen === 'ai-wait' ? waitBody : formBody(aiBlocked)}</div>
           </div>}
         </main>
       </div>
