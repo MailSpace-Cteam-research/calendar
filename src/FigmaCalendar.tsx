@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Avatar, Button, Checkbox, CustomSelect, IconButton, Input, SimpleCell,
   Tappable, Text, Textarea,
@@ -61,7 +62,18 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomId, setRoomId] = useState('');
+  const roomAnchorRef = useRef<HTMLDivElement>(null);
+  const [roomPosition, setRoomPosition] = useState({ top: 0, left: 0 });
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const toggleRoomPicker = () => {
+    if (roomOpen) {setRoomOpen(false);return;}
+    const r=roomAnchorRef.current?.getBoundingClientRect();
+    if(r){
+      const h=252, w=280, below=window.innerHeight-r.bottom-8, above=r.top-8;
+      setRoomPosition({top: below>=h || below>=above ? Math.min(r.bottom+4,window.innerHeight-h-8) : Math.max(8,r.top-h-4),left:Math.max(8,Math.min(r.left,window.innerWidth-w-8))});
+    }
+    setPaletteOpen(false);setCalOpen(false);setEmojiOpen(false);setRoomOpen(true);
+  };
   const [emoji, setEmoji] = useState('');
   const [aiError, setAiError] = useState('');
   const aiPrevious = useRef<Draft | null>(null);
@@ -284,14 +296,15 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
               onChange={e => setPeopleQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && peopleQuery.trim()) { setPeople([{name:peopleQuery.trim(), initials:peopleQuery.slice(0, 2)}]);setPeopleQuery(''); } }} />
           </div>}
         {place && <div className="fg-form-row fg-room-row"><Icon20PlaceOutline className="fg-row-icon" />
-          <div className="fg-room-anchor"><Button className="fg-room-button" mode="tertiary" onClick={()=>setRoomOpen(v=>!v)} aria-expanded={roomOpen}>
+          <div className="fg-room-anchor" ref={roomAnchorRef}><Button className="fg-room-button" mode="tertiary" onClick={toggleRoomPicker} aria-expanded={roomOpen}>
             {roomId ? ROOMS.find(r=>r.id===roomId)?.name : 'Выбрать переговорную'} <Icon16Dropdown />
-          </Button>
-          {roomOpen && <div className="fg-room-menu" role="listbox" aria-label="Выбрать переговорную">
+          </Button></div>
+          {roomOpen && createPortal(<div className="fg-room-menu fg-room-portal" style={{top: roomPosition.top,left:roomPosition.left}}
+              role="listbox" aria-label="Выбрать переговорную">
             {ROOMS.map(r=><Tappable className="fg-room-option" key={r.id} role="option" aria-selected={roomId===r.id} onClick={()=>{setRoomId(r.id);setRoomOpen(false);}}>
               <span>{r.name}</span><small className={r.free?'fg-room-free':'fg-room-busy'}>{r.free?'Свободна':'Занята'} · до {r.cap} человек</small>
             </Tappable>)}
-          </div>}</div>
+          </div>,document.body)}
           <IconButton label="Убрать место" onClick={()=>{setRoomId('');setRoomOpen(false);setPlace(false);}}><Icon20Cancel /></IconButton>
         </div>}
         <div className="fg-form-row fg-video-row"><Icon20VideocamOutline className="fg-row-icon" />
