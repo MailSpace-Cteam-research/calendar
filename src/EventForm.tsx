@@ -67,7 +67,7 @@ function TimeBlock({ f, cal, sl, A }: { f: Form; cal: Ev[]; sl: Slot[]; A: FormA
   );
 }
 
-function People({ f, A }: { f: Form; A: FormActions }) {
+function People({ f, A, placeholder = 'Имя, почта или группа' }: { f: Form; A: FormActions; placeholder?: string }) {
   const chosen = [...f.people, ...f.ext];
   const options = [
     ...[...FREQUENT, ...POOL.filter((n) => !FREQUENT.includes(n))].filter((n) => !chosen.includes(n)).map((n) => ({ value: n, label: n })),
@@ -75,7 +75,7 @@ function People({ f, A }: { f: Form; A: FormActions }) {
   ];
   return (
     <ChipsSelect
-      placeholder="Имя, почта или группа"
+      placeholder={placeholder}
       value={chosen.map((n) => ({ value: n, label: n }))}
       options={options}
       creatable="Пригласить по почте"
@@ -173,7 +173,6 @@ export function EventForm({ f, cal: _cal, sl: _sl, delegated, A }: { f: Form; ca
     { k: 'desc', label: 'Описание', icon: <Icon20ArticleBoxOutline />, visible: !f.desc },
     { k: 'files', label: 'Файлы', icon: <Icon20Attach />, visible: !f.files },
     { k: 'notifications', label: 'Уведомления', icon: <Icon20NotificationOutline />, visible: !notifyOpen },
-    { k: 'room', label: 'Переговорка', icon: <Icon20BuildingOutline />, visible: !f.room },
   ].filter((item) => item.visible);
   const setHour = (text: string, target: 'start' | 'end') => {
     const match = /^(\d{1,2}):(\d{2})$/.exec(text.trim());
@@ -259,7 +258,7 @@ export function EventForm({ f, cal: _cal, sl: _sl, delegated, A }: { f: Form; ca
           <div className="figma-field-row">
             <Icon20UsersOutline className="figma-field-icon" />
             <div className="figma-people-wrap">
-              <People f={f} A={A} />
+              <People f={f} A={A} placeholder="Пригласить участников" />
             </div>
           </div>
           <div className="figma-field-row figma-call-row">
