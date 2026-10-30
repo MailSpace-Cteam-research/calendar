@@ -15,8 +15,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: calendar-preview-pages
-  cancel-in-progress: true
+  group: calendar-preview-pages-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
