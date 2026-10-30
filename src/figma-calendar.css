@@ -221,9 +221,9 @@
 .fg-member-item .vkuiAvatar { flex: 0 0 24px; }
 .fg-member-collapse { position: absolute !important; right: 0; top: 0; margin-top: 0 !important; z-index: 1; color: var(--fg-accent) !important; }
 .fg-member-add { min-height: 32px; height: 32px; margin-top: 2px; }
-.fg-call-filled a { max-width: 233px; text-overflow: ellipsis; }
+.fg-call-filled a { max-width: none; text-overflow: ellipsis; }
 .fg-ai-success > .vkuiIcon { color: var(--vkui--color_icon_positive); }
-.fg-ai-success .vkuiButton, .fg-ai-success .vkuiButton .vkuiIcon { color: var(--fg-icon) !important; }
+.fg-ai-success button, .fg-ai-success button *, .fg-ai-success button .vkuiIcon { color: var(--fg-icon) !important; }
 .fg-mode-ai-compose, .fg-mode-ai-wait { height: 489px; }
 .fg-mode-ai-compose .fg-ai-panel { height: 143px; }
 .fg-mode-ai-compose .fg-ai-text textarea { padding: 4px 16px !important; min-height: 65px; }
@@ -231,6 +231,7 @@
 .fg-mode-ai-compose .fg-card-inner { height: 286px; }
 .fg-mode-ai-compose .fg-waiting { height: 286px; min-height: 286px; opacity: .57; }
 .fg-mode-ai-compose .fg-waiting .fg-form-title input { opacity: 1 !important; }
+.fg-mode-ai-compose .fg-waiting .fg-form-title input::placeholder { color: var(--fg-muted) !important; opacity: 1 !important; }
 .fg-mode-ai-compose .fg-form-footer, .fg-mode-ai-wait .fg-form-footer { display: none; }
 .fg-mode-ai-compose .fg-form-pills, .fg-mode-ai-wait .fg-form-pills { height: 90px; min-height: 90px; }
 .fg-mode-ai-wait .fg-ai-panel { height: 84px; padding: 20px 28px; }
