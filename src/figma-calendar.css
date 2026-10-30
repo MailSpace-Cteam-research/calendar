@@ -373,3 +373,7 @@
   top: auto;
   bottom: auto;
 }
+/* Five 48px rows + 12px panel padding: all options remain visible without inner scrolling. */
+.fg-room-portal .fg-room-option { min-height: 48px; height: 48px; gap: 0 !important; padding: 6px 12px !important; }
+.fg-room-portal .fg-room-option > span { display: block; min-height: 18px; line-height: 18px; }
+.fg-room-portal .fg-room-option > small { display: block; min-height: 16px; line-height: 16px; }
