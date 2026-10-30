@@ -53,7 +53,7 @@ function presetState(k: string, prev: St): St {
 }
 
 export default function App() {
-  const [s, setS] = useState<St>(() => presetState('s2', { growRule: 'logistics' } as St));
+  const [s, setS] = useState<St>(() => { const initial = presetState('s1', { growRule: 'logistics' } as St); if (initial.form) { initial.form.title = ''; initial.form.d = 1; initial.form.s = 10; initial.form.len = 0.5; initial.form.call = false; initial.form.people = []; initial.form.ext = []; } return initial; });
   const [hover, setHover] = useState<number | null>(null);
   const flipFrom = useRef<DOMRect | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);

@@ -101,14 +101,52 @@ function People({ f, A }: { f: Form; A: FormActions }) {
   );
 }
 
+function ParticipantList({ f, A }: { f: Form; A: FormActions }) {
+  const people = [...f.people, ...f.ext];
+  const visible = f.participantsExpanded ? people : people.slice(0, 3);
+  const remaining = Math.max(0, people.length - visible.length);
+  return (
+    <div className="participant-list">
+      <div className="participant-row organizer-row">
+        <Avatar size={24} initials="Я" gradientColor={1} />
+        <div className="participant-copy">
+          <Text>Вы</Text>
+          <Footnote className="muted">организатор</Footnote>
+        </div>
+      </div>
+      {visible.map((name) => (
+        <div className="participant-row" key={name}>
+          <Avatar size={24} initials={name.slice(0, 1).toUpperCase()} gradientColor={grad(name)} />
+          <Text className="participant-name">{name}</Text>
+        </div>
+      ))}
+      {remaining > 0 && (
+        <Button size="s" mode="tertiary" className="participant-toggle"
+          onClick={() => A.set((x) => { x.participantsExpanded = true; })}>
+          Ещё {remaining} {plural(remaining)}
+        </Button>
+      )}
+      {f.participantsExpanded && people.length > 3 && (
+        <Button size="s" mode="tertiary" className="participant-toggle"
+          onClick={() => A.set((x) => { x.participantsExpanded = false; })}>
+          Свернуть
+        </Button>
+      )}
+      <Button size="s" mode="secondary" before={<Icon16Add />}
+        onClick={() => A.set((x) => { x.peopleOpen = !x.peopleOpen; })}>
+        {f.peopleOpen ? 'Скрыть добавление' : 'Добавить участников'}
+      </Button>
+      {f.peopleOpen && <People f={f} A={A} />}
+      {people.length > 0 && <Footnote className="links"><Link>Права участников</Link><Link>Написать всем</Link><Link>Копировать список</Link></Footnote>}
+    </div>
+  );
+}
+
 type Blk = { k: string; icon: React.ReactNode; name: string; me?: boolean; on: (f: Form) => boolean; sum: (f: Form) => string; body: (f: Form, A: FormActions) => React.ReactNode };
 const BLOCKS: Blk[] = [
   { k: 'people', icon: <Icon20UsersOutline />, name: 'Участники', on: (f) => f.people.length + f.ext.length > 0 || !!f.peopleOpen,
     sum: (f) => { const n = f.people.length + f.ext.length; if (!n) return 'Пока никого'; const bn = busyNames(f, f.d, f.s, f.s + f.len); return `${n} ${plural(n)} · ${bn.length ? `заняты: ${bn.join(', ')}` : f.people.length ? 'все свободны' : 'нет данных о занятости'}`; },
-    body: (f, A) => (<>
-      <People f={f} A={A} />
-      <Footnote className="links"><Link>Права участников</Link><Link>Написать всем</Link><Link>Копировать список</Link></Footnote>
-    </>) },
+    body: (f, A) => <ParticipantList f={f} A={A} /> },
   { k: 'room', icon: <Icon20BuildingOutline />, name: 'Переговорка', on: (f) => !!f.room,
     sum: (f) => { const r = roomBy(f.room)!; return `${r.n}, ${r.fl} · ${r.cap} мест${f.roomAuto ? ' · подобрана' : ''}`; },
     body: (f, A) => (<>
@@ -146,11 +184,55 @@ export function EventForm({ f, cal, sl, delegated, A }: { f: Form; cal: Ev[]; sl
   const pop = f.mode === 'pop', anna = f.owner === 'anna';
   const n = f.people.length + f.ext.length;
   const avail = ADDS.filter(([k]) => !BLOCKS.find((b) => b.k === k)!.on(f));
-  const body = pop ? (<>
-    {(n > 0 || f.peopleOpen) && <div className="row"><Icon20UsersOutline className="ric" /><div className="c"><People f={f} A={A} /></div></div>}
-    {f.call && <div className="row"><Icon20VideocamOutline className="ric" /><div className="c"><Link>calls.mail.ru/room/7a3f-91c2</Link><Footnote className="muted">добавлен сам, потому что есть участники</Footnote></div></div>}
-    {f.place && <div className="row"><Icon20PlaceOutline className="ric" /><div className="c"><Text>Ленинградский пр-т, 39, стр. 79</Text></div></div>}
-  </>) : (
+  const body = pop ? (
+    <>
+      <div className="design-date-row">
+        <Icon20ClockOutline className="design-row-icon" />
+        <div className="design-date-controls">
+          <button type="button" className="design-field" onClick={() => A.set((x) => { x.d = (x.d + 1) % 5; })}>{DAYF[f.d]}</button>
+          <button type="button" className="design-field" onClick={() => A.set((x) => { x.s = x.s >= 17.5 ? 10 : x.s + 0.5; })}>{fmt(f.s)}</button>
+          <span className="design-dash">—</span>
+          <button type="button" className="design-field" onClick={() => A.set((x) => { x.len = x.len === 0.5 ? 1 : x.len === 1 ? 1.5 : 0.5; })}>{fmt(f.s + f.len)}</button>
+          <button type="button" className="design-all-day" onClick={() => A.set((x) => { x.len = x.len === 8 ? 1 : 8; })}><span className={'design-checkbox' + (f.len === 8 ? ' checked' : '')}>{f.len === 8 ? '✓' : ''}</span>Весь день</button>
+        </div>
+      </div>
+      <div className="design-row">
+        <Icon20UsersOutline className="design-row-icon" />
+        <div className="design-input" onClick={() => A.set((x) => { x.peopleOpen = !x.peopleOpen; })}>
+          {n ? <span className="design-selected">{f.people.concat(f.ext).join(', ')}</span> : <span className="design-placeholder">Пригласить участников</span>}
+        </div>
+      </div>
+      {(f.peopleOpen || n > 0) && <div className="design-people-editor"><People f={f} A={A} /></div>}
+      <div className="design-row design-video" onClick={() => A.set((x) => { x.call = !x.call; })}>
+        <Icon20VideocamOutline className="design-row-icon" />
+        {f.call ? <Link>calls.mail.ru/room/7a3f-91c2</Link> : <span className="design-placeholder">Ссылка на звонок</span>}
+      </div>
+      <div className="design-pills">
+        {([
+          ['repeat', 'Повтор', <Icon20RefreshOutline key="repeat" />],
+          ['place', 'Место', <Icon20BuildingOutline key="place" />],
+          ['desc', 'Описание', <Icon20ArticleBoxOutline key="desc" />],
+          ['files', 'Файлы', <Icon20Attach key="files" />],
+          ['mine', 'Уведомления', <Icon20NotificationOutline key="mine" />],
+        ] as [string, string, React.ReactNode][]).map(([key, label, icon]) => (
+          <button key={key} type="button" className="design-pill" onClick={() => A.addBlock(key)}>
+            {icon}<span>{label}</span>
+          </button>
+        ))}
+      </div>
+      {f.open === 'mine' && <div className="design-notice">Уведомления: в приложении за 15 минут до события.</div>}
+      {(f.repeat || f.room || f.desc || f.files || f.place) && (
+        <div className="design-expanded-options">
+          {BLOCKS.filter((b) => ['repeat','room','desc','files','place'].includes(b.k) && b.on(f)).map((b) => (
+            <div className="design-option" key={b.k}>
+              <div className="design-option-title">{b.name}<button type="button" onClick={() => A.set((x) => { if (b.k === 'repeat') x.repeat = false; if (b.k === 'room') x.room = null; if (b.k === 'desc') x.desc = false; if (b.k === 'files') x.files = false; if (b.k === 'place') x.place = false; })}>×</button></div>
+              <div className="design-option-content">{b.body(f, A)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  ) : (
     <div className="blocks">
       {BLOCKS.filter((b) => b.on(f)).map((b) => (
         <Accordion key={b.k} expanded={f.open === b.k} onChange={(v) => A.set((x) => { x.open = v ? b.k : null; })}>
@@ -171,21 +253,25 @@ export function EventForm({ f, cal, sl, delegated, A }: { f: Form; cal: Ev[]; sl
           renderOption={({ option, ...rest }: any) => <CustomSelectOption {...rest} before={<Avatar size={24} initials={option.value === 'anna' ? 'А' : 'Я'} gradientColor={option.value === 'anna' ? 5 : 1} />} description={option.description} />}
           onChange={(e: any, v: any) => { const val = v ?? e?.target?.value; A.set((x) => { x.owner = val === 'anna' ? 'anna' : 'me'; }); }} />
       )}
-      <div className="fh">
-        <Input mode="plain" className="ttl" id="ttl" value={f.title} placeholder="Название" aria-label="Название" onChange={(e) => { const v = e.target.value; A.set((x) => { x.title = v; }); }} />
-        <IconButton label={pop ? 'Развернуть в сайдбар' : 'Свернуть'} onClick={pop ? A.grow : A.shrink}>{pop ? <Icon20FullscreenOutline /> : <Icon20FullscreenExitOutline />}</IconButton>
+      <div className="design-ai-row">
+        <button type="button" className="design-ai-trigger" onClick={() => A.set((x) => { x.open = x.open === 'ai' ? null : 'ai'; })}>
+          <span className="design-stars">✦</span><span>Заполнить с нейропомощником</span>
+        </button>
         <IconButton label="Закрыть" onClick={A.close}><Icon20Cancel /></IconButton>
       </div>
-      <TimeBlock f={f} cal={cal} sl={sl} A={A} />
-      {body}
-      {avail.length > 0 && (
-        <div className="adds">{avail.map(([k, t]) => <Button key={k} size="s" mode="secondary" before={<Icon16Add />} onClick={() => A.addBlock(k)}>{t}</Button>)}</div>
-      )}
-      <div className="foot">
-        <Button size={pop ? 'm' : 'l'} mode="primary" className={anna ? 'annabtn' : ''} onClick={A.send}>
-          {n ? `${anna ? 'Отправить от имени Анны' : 'Отправить приглашения'} (${n})` : 'Сохранить'}
-        </Button>
-        {pop && <Button size="m" mode="secondary" onClick={A.grow}>Подробнее</Button>}
+      {f.open === 'ai' && <div className="design-ai-input"><Input placeholder="Опишите событие своими словами" value={f.title} onChange={(e) => A.set((x) => { x.title = e.target.value; })} /><Button size="s" mode="primary" onClick={() => A.set((x) => { x.open = null; })}>Заполнить</Button></div>}
+      <div className="design-form-card">
+        <div className="design-header">
+          <button type="button" className="design-emoji" aria-label="Эмодзи события">☺</button>
+          <Input mode="plain" className="ttl" id="ttl" value={f.title} placeholder="Добавьте название" aria-label="Название" onChange={(e) => { const v = e.target.value; A.set((x) => { x.title = v; }); }} />
+          <button type="button" className="design-color" onClick={() => A.set((x) => { x.open = x.open === 'color' ? null : 'color'; })}><span style={{ background: f.eventColor || '#07f' }} />⌄</button>
+        </div>
+        {f.open === 'color' && <div className="design-color-menu">{['#07f','#8e55ea','#e64646','#ff9500','#18a058','#00a1a6','#ffcf33','#f06292'].map((color) => <button key={color} aria-label={'Цвет '+color} style={{background:color}} onClick={() => A.set((x) => { x.eventColor = color; x.open = null; })} />)}</div>}
+        <div className="design-content">{body}</div>
+        <div className="design-footer">
+          <Button size="m" mode="primary" className={anna ? 'annabtn' : ''} onClick={A.send}>{n ? `Отправить приглашения (${n})` : 'Сохранить'}</Button>
+          <button type="button" className="design-calendar"><span className="design-calendar-dot" />Основной <span>⌄</span></button>
+        </div>
       </div>
     </Root>
   );
