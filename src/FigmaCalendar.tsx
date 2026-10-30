@@ -427,8 +427,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           {showForm && <div className={'fg-event-form fg-mode-'+screen+(participantsExpanded && aiDone ? ' fg-participants-expanded' : '')+(availabilityOpen && isApplied ? ' fg-with-slots' : '')} data-testid="event-form">
             <div className="fg-event-head">
               {compact || isApplied ? <Tappable className="fg-ai-entry" onClick={() => startAI(isApplied ? (submittedPrompt||AI_JIRA_REQUEST) : AI_DEFAULT)}><Icon20Stars /><span>{isApplied ? 'Изменить с нейропомощником' : 'Заполнить с нейропомощником'}</span></Tappable>
-              : screen==='ai-done' ? <div className="fg-ai-result-head"><Tappable onClick={applyAI} className="fg-ai-result-apply" aria-label="Применить заполнение и вернуться к событию"><Icon20ChevronLeftOutline /><span>Заполнил 4 поля</span></Tappable>
-                  <Button mode="tertiary" size="s" before={<Icon20ArrowUturnLeftOutline />} onClick={undoAI}>Отменить</Button></div>
+              : screen==='ai-done' ? <Tappable className="fg-ai-entry fg-ai-back" aria-label="Вернуться к редактированию события" onClick={applyAI}><Icon20ChevronLeftOutline /><span>Нейропомощник</span></Tappable>
               : <Tappable className="fg-ai-entry fg-ai-back" onClick={leaveAI}><Icon20ChevronLeftOutline /><span>Нейропомощник</span></Tappable>}
               <IconButton label="Закрыть форму" className="fg-form-close" onClick={()=>setShowForm(false)}><Icon20Cancel /></IconButton>
             </div>
