@@ -153,6 +153,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     }, 2100);
   };
   const applyAI = () => {
+    if (title === AI_RESULT_TITLE) setTitle('Синк по задаче\nБАЗ файлы в блоке\nквоты');
     window.clearTimeout(thinkingTimer.current);
     setScreen('ai-applied'); setAvailabilityOpen(people.length > 0); setPaletteOpen(false); setCalOpen(false);
   };
@@ -186,7 +187,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     if (!title.trim()) { setAiError('Добавьте название события'); return; }
     if (to <= from && !allDay) { setAiError('Конец события должен быть позже начала'); return; }
     setAiError('');
-    setSavedEvents(e => [...e, { id: Date.now(), d: day, start: from, end: to, title }]);
+    setSavedEvents(e => [...e, { id: Date.now(), d: day, start: from, end: to, title: title.trim().replace(/\s+/g,' ') }]);
     setShowForm(false); alert(`Событие «${title}» сохранено`);
   };
   const compact = screen === 'event';
@@ -211,7 +212,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           {emojiOpen && <div className="fg-emoji-menu" role="group" aria-label="Эмодзи события">{['📅','💬','📌','🎯','🤝','✨','📝','🚀'].map(e=><Tappable key={e} aria-label={'Выбрать '+e} onClick={()=>{setEmoji(e);setEmojiOpen(false);}}>{e}</Tappable>)}</div>}
         </div>
         {aiDone ? <Textarea className="fg-form-title fg-title-multiline" aria-label="Название события" placeholder="Добавьте название"
-          rows={2} value={title} onChange={e => setTitle(e.target.value)} />
+          rows={isApplied ? 3 : 2} value={title} onChange={e => setTitle(e.target.value)} />
         : <Input mode="plain" className="fg-form-title" aria-label="Название события" placeholder="Добавьте название"
           value={title} disabled={disabled} onChange={e => setTitle(e.target.value)} />}
         <div className="fg-palette-anchor">
@@ -282,15 +283,6 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
             <Input mode="plain" className="fg-simple-input" value={peopleQuery} disabled={disabled} placeholder="Пригласить участников" aria-label="Пригласить участников"
               onChange={e => setPeopleQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && peopleQuery.trim()) { setPeople([{name:peopleQuery.trim(), initials:peopleQuery.slice(0, 2)}]);setPeopleQuery(''); } }} />
           </div>}
-        <div className="fg-form-row fg-video-row"><Icon20VideocamOutline className="fg-row-icon" />
-          {callLink ? <div className="fg-call-filled"><a href={callLink} target="_blank" rel="noreferrer" title={callLink}>{callLink.startsWith('https://calls.mail.ru/room/') ? 'https://calls.mail.ru/room/36894...' : callLink}</a>
-            <IconButton label="Копировать ссылку" onClick={() => { navigator.clipboard?.writeText(callLink); alert('Ссылка скопирована'); }}><Icon20CopyOutline /></IconButton>
-            <IconButton label="Удалить видеовстречу" onClick={() => setCallLink('')}><Icon20Cancel /></IconButton></div>
-          : <Input mode="plain" className="fg-simple-input" disabled={disabled} value={callLink}
-            onChange={e => setCallLink(e.target.value)} placeholder="Ссылка на звонок" aria-label="Ссылка на звонок"/>}
-        </div>
-        {description && <div className="fg-form-row fg-description-row"><Icon20ArticleBoxOutline className="fg-row-icon" />
-          <Textarea className="fg-description" aria-label="Описание" value={description} onChange={e => setDescription(e.target.value)} rows={3}/></div>}
         {place && <div className="fg-form-row fg-room-row"><Icon20PlaceOutline className="fg-row-icon" />
           <div className="fg-room-anchor"><Button className="fg-room-button" mode="tertiary" onClick={()=>setRoomOpen(v=>!v)} aria-expanded={roomOpen}>
             {roomId ? ROOMS.find(r=>r.id===roomId)?.name : 'Выбрать переговорную'} <Icon16Dropdown />
@@ -302,6 +294,15 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
           </div>}</div>
           <IconButton label="Убрать место" onClick={()=>{setRoomId('');setRoomOpen(false);setPlace(false);}}><Icon20Cancel /></IconButton>
         </div>}
+        <div className="fg-form-row fg-video-row"><Icon20VideocamOutline className="fg-row-icon" />
+          {callLink ? <div className="fg-call-filled"><a href={callLink} target="_blank" rel="noreferrer" title={callLink}>{callLink.startsWith('https://calls.mail.ru/room/') ? 'https://calls.mail.ru/room/36894...' : callLink}</a>
+            <IconButton label="Копировать ссылку" onClick={() => { navigator.clipboard?.writeText(callLink); alert('Ссылка скопирована'); }}><Icon20CopyOutline /></IconButton>
+            <IconButton label="Удалить видеовстречу" onClick={() => setCallLink('')}><Icon20Cancel /></IconButton></div>
+          : <Input mode="plain" className="fg-simple-input" disabled={disabled} value={callLink}
+            onChange={e => setCallLink(e.target.value)} placeholder="Ссылка на звонок" aria-label="Ссылка на звонок"/>}
+        </div>
+        {description && <div className="fg-form-row fg-description-row"><Icon20ArticleBoxOutline className="fg-row-icon" />
+          <Textarea className="fg-description" aria-label="Описание" value={description} onChange={e => setDescription(e.target.value)} rows={3}/></div>}
         {repeat && <SimpleCell className="fg-extra-line" before={<Icon20Arrow2SquarepathOutline />} onClick={() => setRepeat(false)}>Каждую неделю · убрать</SimpleCell>}
         {files && <SimpleCell className="fg-extra-line" before={<Icon20Attach />} onClick={() => alert('Файлы прикрепляются в демоверсии')}>Прикрепить файл</SimpleCell>}
         {notify && <SimpleCell className="fg-extra-line" before={<Icon20NotificationOutline />} onClick={() => setNotify(false)}>За 15 минут · убрать</SimpleCell>}
@@ -350,7 +351,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
       <div className="fg-demo-buttons"><Button mode="secondary" size="s" onClick={() => resetForm()}>Новая форма</Button>
       <Button mode="secondary" size="s" onClick={() => {resetForm();startAI();}}>Нейропомощник</Button>
       <Button mode="secondary" size="s" onClick={() => { resetForm();setTitle(AI_RESULT_TITLE);setFrom(720);setTo(750);setPeople(FAKE_PEOPLE);setCallLink('https://calls.mail.ru/room/36894w9a');setDescription(AI_RESULT_DESCRIPTION);setScreen('ai-done'); }}>После заполнения</Button>
-      <Button mode="secondary" size="s" onClick={() => {resetForm();setTitle(AI_RESULT_TITLE);setFrom(660);setTo(690);setPeople(FAKE_PEOPLE);setCallLink('https://calls.mail.ru/room/36894w9a');setDescription(AI_RESULT_DESCRIPTION);setScreen('ai-applied');setAvailabilityOpen(true);}}>Решение · свободные слоты</Button>
+      <Button mode="secondary" size="s" onClick={() => {resetForm();setTitle('Синк по задаче\nБАЗ файлы в блоке\nквоты');setFrom(660);setTo(690);setPeople(FAKE_PEOPLE);setCallLink('https://calls.mail.ru/room/36894w9a');setDescription(AI_RESULT_DESCRIPTION);setScreen('ai-applied');setAvailabilityOpen(true);}}>Решение · свободные слоты</Button>
       <Button mode="tertiary" size="s" onClick={onLegacy}>Предыдущие сценарии</Button>
       <div className="fg-example-prompts" role="group" aria-label="Примеры запросов нейропомощнику">
         {AI_EXAMPLES.map((ex, i) => <Button size="s" mode="tertiary" key={ex} onClick={() => startAI(ex)}>{['1:1', 'Синк', 'Квартальная встреча', 'Jira SP-30329'][i]}</Button>)}
