@@ -11,7 +11,7 @@ export type Form = {
   mode: 'pop' | 'side'; title: string; d: number; s: number; len: number;
   people: string[]; ext: string[]; room: string | null; roomAuto: boolean;
   repeat: boolean; call: boolean; desc: boolean; files: boolean; place: boolean;
-  open: string | null; owner: 'me' | 'anna'; peopleOpen?: boolean; participantsExpanded?: boolean; filesAccess?: string;
+  open: string | null; owner: 'me' | 'anna'; peopleOpen?: boolean; participantsExpanded?: boolean; filesAccess?: string; eventColor?: string;
 };
 
 export const fmt = (h: number) => { const m = Math.round((h % 1) * 60); return `${Math.floor(h)}:${m < 10 ? '0' + m : m}`; };
@@ -52,7 +52,7 @@ export const roomBy = (n: string | null) => ROOMS.find((r) => r.n === n) || null
 
 export const newForm = (d: number, s: number, o: Partial<Form> = {}): Form => ({
   mode: 'pop', title: '', d, s, len: 1, people: [], ext: [], room: null, roomAuto: true,
-  repeat: false, call: false, desc: false, files: false, place: false, open: null, owner: 'me', peopleOpen: false, participantsExpanded: false, filesAccess: 'members', ...o,
+  repeat: false, call: false, desc: false, files: false, place: false, open: null, owner: 'me', peopleOpen: false, participantsExpanded: false, filesAccess: 'members', eventColor: '#07f', ...o,
 });
 
 export function busyNames(f: Form, d: number, s: number, e: number) {
