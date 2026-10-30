@@ -343,3 +343,10 @@
 .fg-availability-toggle:not([aria-expanded=true]) { color: var(--fg-muted); }
 .fg-mode-ai-applied .fg-room-anchor { z-index: 5; }
 .fg-mode-ai-applied .fg-room-menu { z-index: 180; }
+
+/* 100:63688: editable applied state has a 124px heading for a three-line title, as in Figma. */
+.fg-mode-ai-applied .fg-form-heading { height: 124px; flex-basis: 124px; min-height: 124px; }
+.fg-mode-ai-applied .fg-title-multiline textarea { min-height: 92px; height: 92px; }
+.fg-mode-ai-applied .fg-palette-anchor { margin-top: 0; }
+.fg-mode-ai-applied .fg-room-anchor .vkuiButton { background: transparent; }
+.fg-mode-ai-applied .fg-room-menu { width: 280px; max-height: 240px; }
