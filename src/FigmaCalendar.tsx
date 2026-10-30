@@ -10,6 +10,7 @@ import {
   Icon20RefreshOutline, Icon20SmileOutline, Icon20Stars, Icon20UsersOutline,
   Icon20VideocamOutline, Icon20PollOutline, Icon20PlaceOutline,
   Icon20MailOutline, Icon20MoreHorizontal, Icon20CopyOutline,
+  Icon20Arrow2SquarepathOutline,
   Icon20ArrowUturnLeftOutline, Icon20CheckCircleOutline,
 } from '@vkontakte/icons';
 import './figma-calendar.css';
@@ -160,7 +161,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const aiDone = screen === 'ai-done';
   const aiBlocked = screen === 'ai-compose';
   const rows = [
-    { k: 'repeat', label: 'Повтор', icon: <Icon20RefreshOutline />, enabled: repeat, set: setRepeat },
+    { k: 'repeat', label: 'Повтор', icon: <Icon20Arrow2SquarepathOutline />, enabled: repeat, set: setRepeat },
     { k: 'place', label: 'Место', icon: <Icon20BuildingOutline />, enabled: place, set: setPlace },
     { k: 'description', label: 'Описание', icon: <Icon20ArticleBoxOutline />, enabled: !!description, set: (v: boolean) => setDescription(v ? 'Введите описание' : '') },
     { k: 'files', label: 'Файлы', icon: <Icon20Attach />, enabled: files, set: setFiles },
@@ -245,7 +246,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
         {description && <div className="fg-form-row fg-description-row"><Icon20ArticleBoxOutline className="fg-row-icon" />
           <Textarea className="fg-description" aria-label="Описание" value={description} onChange={e => setDescription(e.target.value)} rows={3}/></div>}
         {place && <div className="fg-form-row"><Icon20PlaceOutline className="fg-row-icon" /><Input mode="plain" className="fg-simple-input" placeholder="Введите место" aria-label="Место" /></div>}
-        {repeat && <SimpleCell className="fg-extra-line" before={<Icon20RefreshOutline />} onClick={() => setRepeat(false)}>Каждую неделю · убрать</SimpleCell>}
+        {repeat && <SimpleCell className="fg-extra-line" before={<Icon20Arrow2SquarepathOutline />} onClick={() => setRepeat(false)}>Каждую неделю · убрать</SimpleCell>}
         {files && <SimpleCell className="fg-extra-line" before={<Icon20Attach />} onClick={() => alert('Файлы прикрепляются в демоверсии')}>Прикрепить файл</SimpleCell>}
         {notify && <SimpleCell className="fg-extra-line" before={<Icon20NotificationOutline />} onClick={() => setNotify(false)}>За 15 минут · убрать</SimpleCell>}
         <div className="fg-form-pills">
