@@ -9,7 +9,7 @@ import {
   Icon20CheckCircleOn, Icon20ClockOutline, Icon20FullscreenExitOutline, Icon20FullscreenOutline,
   Icon20NotificationOutline, Icon20PlaceOutline, Icon20PollOutline, Icon20RefreshOutline,
   Icon20Users3Outline, Icon20UsersOutline, Icon20VideocamOutline, Icon20WarningTriangleOutline,
-  Icon20SmileOutline, Icon20Stars, Icon16Dropdown, Icon20CalendarOutline, Icon20DropdownOutline,
+  Icon20SmileOutline, Icon20Stars, Icon16Dropdown, Icon20CalendarOutline,
 } from '@vkontakte/icons';
 import {
   DAYF, DAYS, FREQUENT, H1, POOL, ROOMS, busyNames, durT, fmt, gender, grad, ownerBusy, personStatus,
@@ -291,7 +291,7 @@ export function EventForm({ f, cal: _cal, sl: _sl, delegated, A }: { f: Form; ca
         <div className="figma-form-footer">
           <Button className="figma-save" size="m" mode="primary" onClick={A.send}>Сохранить</Button>
           <CustomSelect className="figma-calendar-select" mode="plain" value={f.owner}
-            before={<Icon20CalendarOutline />} icon={<Icon20DropdownOutline />}
+            before={<Icon20CalendarOutline />} icon={<Icon16Dropdown />}
             options={[{ value: 'me', label: 'Основной' }, { value: 'anna', label: 'Рабочий' }]}
             onChange={(_e: any, v: any) => A.set((x) => { x.owner = v === 'anna' ? 'anna' : 'me'; })} />
           {!pop && <IconButton className="figma-collapse" label="Свернуть в поповер" onClick={A.shrink}><Icon20FullscreenExitOutline /></IconButton>}
