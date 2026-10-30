@@ -35,6 +35,9 @@ jobs:
         run: npm run build
       - name: Verify generated preview exists
         run: test -s dist/index.html
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
       - name: Upload Pages site
         uses: actions/upload-pages-artifact@v3
         with:
@@ -48,8 +51,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
       - name: Publish calendar preview
         id: deployment
         uses: actions/deploy-pages@v4
