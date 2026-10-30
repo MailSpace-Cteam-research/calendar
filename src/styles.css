@@ -282,3 +282,13 @@ body:has(.figma-mode) { padding: 0; }
   .figma-clock-input { width: 50px; flex-basis: 50px; }
   .figma-form-footer { padding-inline: 18px; }
 }
+
+/* Week toolbar / compact seven-day state. */
+.wrap.figma-mode .figma-view-nav { display: flex; align-items: center; gap: 0; margin-left: auto; }
+.wrap.figma-mode .figma-view-nav .vkuiButton { color: var(--vkui--color_text_secondary); font-size: 14px; padding-inline: 10px; min-width: 0; }
+.wrap.figma-mode .figma-view-nav .selected { color: var(--vkui--color_text_primary); font-weight: 500; }
+.wrap.figma-mode .figma-view-nav .vkuiButton:last-child { color: var(--vkui--color_text_primary); margin-left: 8px; }
+.wrap.figma-mode .dh.weekend { background: color-mix(in srgb, var(--vkui--color_background_secondary) 45%, var(--vkui--color_background_content)); }
+.wrap.figma-mode .week { width: 100%; }
+.wrap.figma-mode .tcol { background: var(--vkui--color_background_content); }
+.wrap.figma-mode .tcol span { font-size: 12px; }
