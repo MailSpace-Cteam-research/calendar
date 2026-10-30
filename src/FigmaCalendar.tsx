@@ -15,8 +15,11 @@ import {
 } from '@vkontakte/icons';
 import './figma-calendar.css';
 
-type Screen = 'event' | 'ai-compose' | 'ai-wait' | 'ai-done';
+type Screen = 'event' | 'ai-compose' | 'ai-wait' | 'ai-done' | 'ai-applied';
 type Person = { name: string; initials: string; role?: string };
+type Draft = { title: string; people: Person[]; day: number; from: number; to: number; callLink: string; description: string; repeat: boolean; place: boolean; files: boolean; notify: boolean; colour: string; calendar: string };
+const FREE_SLOTS = [{ label: 'Пт, 11 апр · 10:00', day: 4, start: 600 }, { label: 'Пт, 11 апр · 15:00', day: 4, start: 900 }, { label: 'Пн, 14 апр · 12:00', day: 0, start: 720 }];
+const ROOMS = [{ id: 'secret', name: 'Тайная комната, 5 эт.', cap: 8, free: true }, { id: 'blue', name: 'Синяя, 4 эт.', cap: 6, free: true }, { id: 'big', name: 'Большая, 2 эт.', cap: 20, free: true }, { id: 'green', name: 'Зелёная, 3 эт.', cap: 10, free: false }, { id: 'small', name: 'Маленькая, 5 эт.', cap: 4, free: false }];
 type CalendarEvent = { id: number; d: number; start: number; end: number; title: string; color?: 'mint' | 'lilac'; call?: boolean };
 const COLORS = ['#e95991', '#0077ff', '#96e9cd', '#c9baff', '#ffdc80', '#ffc4a0'];
 const DAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
@@ -55,6 +58,14 @@ const toMins = (s: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec(s); return 
 
 export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const [screen, setScreen] = useState<Screen>('event');
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [roomOpen, setRoomOpen] = useState(false);
+  const [roomId, setRoomId] = useState('');
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [emoji, setEmoji] = useState('');
+  const [aiError, setAiError] = useState('');
+  const aiPrevious = useRef<Draft | null>(null);
+  const peopleInputRef = useRef<HTMLInputElement>(null);
   const [day, setDay] = useState(1);
   const [from, setFrom] = useState(600);
   const [to, setTo] = useState(630);
@@ -93,6 +104,15 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     };
   }, []);
   const alert = (s: string) => { setToast(s); window.setTimeout(() => setToast(''), 3200); };
+  useEffect(() => {
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (paletteOpen || calOpen || roomOpen || emojiOpen) {setPaletteOpen(false);setCalOpen(false);setRoomOpen(false);setEmojiOpen(false);e.preventDefault();return;}
+      if (screen === 'ai-compose' || screen === 'ai-wait') {leaveAI();e.preventDefault();}
+    };
+    document.addEventListener('keydown', keyHandler);
+    return () => document.removeEventListener('keydown', keyHandler);
+  }, [paletteOpen, calOpen, roomOpen, emojiOpen, screen]);
   const resetForm = (d = 1, start = 600) => {
     window.clearTimeout(aiTimer.current);
     window.clearTimeout(thinkingTimer.current);
@@ -102,17 +122,19 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     setDescription(''); setCallLink(''); setScreen('event'); setShowForm(true);
     setRepeat(false); setPlace(false); setFiles(false); setNotify(false); setParticipantsExpanded(false);
     setPeopleQuery(''); setPaletteOpen(false); setCalOpen(false); setAllDay(false); setColour(COLORS[0]); setCalendar('me');
+    setRoomOpen(false); setRoomId(''); setAvailabilityOpen(false); setEmojiOpen(false); setEmoji(''); setAiError(''); aiPrevious.current = null;
   };
   const startAI = (example = AI_DEFAULT) => {
     window.clearTimeout(aiTimer.current);
     window.clearTimeout(thinkingTimer.current);
+    aiPrevious.current = { title, people: [...people], day, from, to, callLink, description, repeat, place, files, notify, colour, calendar };
     setScreen('ai-compose'); setShowForm(true); setAiPrompt(example);
     setSubmittedPrompt(''); setThinkingLabel('Думаю...'); setPaletteOpen(false); setCalOpen(false);
   };
   const fillAI = () => {
     const prompt = aiPrompt.trim();
     if (!prompt) return;
-    setSubmittedPrompt(prompt);
+    setSubmittedPrompt(prompt); setAiError('');
     setThinkingLabel('Думаю...');
     setScreen('ai-wait');
     window.clearTimeout(aiTimer.current);
@@ -130,18 +152,25 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
       setScreen('ai-done');
     }, 2100);
   };
+  const applyAI = () => {
+    window.clearTimeout(thinkingTimer.current);
+    setScreen('ai-applied'); setAvailabilityOpen(people.length > 0); setPaletteOpen(false); setCalOpen(false);
+  };
   const undoAI = () => {
     window.clearTimeout(aiTimer.current);
     window.clearTimeout(thinkingTimer.current);
-    setTitle(''); setPeople([]); setParticipantsExpanded(false);
-    setCallLink(''); setDescription(''); setPeopleQuery('');
-    setFrom(600); setTo(630); setTimeStartDraft(null); setTimeEndDraft(null);
-    setScreen('ai-compose');
+    const prev = aiPrevious.current;
+    setTitle(prev?.title ?? ''); setPeople(prev?.people ?? []); setParticipantsExpanded(false);
+    setCallLink(prev?.callLink ?? ''); setDescription(prev?.description ?? ''); setPeopleQuery('');
+    setDay(prev?.day ?? 1); setFrom(prev?.from ?? 600); setTo(prev?.to ?? 630); setTimeStartDraft(null); setTimeEndDraft(null);
+    setRepeat(prev?.repeat ?? false); setPlace(prev?.place ?? false); setFiles(prev?.files ?? false); setNotify(prev?.notify ?? false);
+    setColour(prev?.colour ?? COLORS[0]); setCalendar(prev?.calendar ?? 'me');
+    setAvailabilityOpen(false); setRoomOpen(false); setScreen('ai-compose');
   };
   const leaveAI = () => {
     window.clearTimeout(aiTimer.current);
     window.clearTimeout(thinkingTimer.current);
-    setScreen('event'); setSubmittedPrompt('');
+    setScreen(screen === 'ai-done' || screen === 'ai-applied' ? 'ai-applied' : 'event'); setSubmittedPrompt('');
   };
   const commitTime = (value: string | null, which: 'start' | 'end') => {
     if (value == null) return;
@@ -154,13 +183,17 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
     else setTimeEndDraft(null);
   };
   const save = () => {
-    if (!title.trim()) { alert('Добавьте название события'); return; }
+    if (!title.trim()) { setAiError('Добавьте название события'); return; }
+    if (to <= from && !allDay) { setAiError('Конец события должен быть позже начала'); return; }
+    setAiError('');
     setSavedEvents(e => [...e, { id: Date.now(), d: day, start: from, end: to, title }]);
     setShowForm(false); alert(`Событие «${title}» сохранено`);
   };
   const compact = screen === 'event';
   const isAI = screen !== 'event';
-  const aiDone = screen === 'ai-done';
+  const aiDone = screen === 'ai-done' || screen === 'ai-applied';
+  const isApplied = screen === 'ai-applied';
+  const hasConflict = day === 1 && from >= 660 && from < 750 && people.length > 0;
   const aiBlocked = screen === 'ai-compose';
   const rows = [
     { k: 'repeat', label: 'Повтор', icon: <Icon20Arrow2SquarepathOutline />, enabled: repeat, set: setRepeat },
@@ -174,7 +207,9 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
   const formBody = (disabled = false) => (
     <div className={'fg-event-content' + (disabled ? ' fg-waiting' : '')}>
       <div className="fg-form-heading">
-        <IconButton label="Выбрать эмодзи события" className="fg-form-smile" onClick={() => alert('Эмодзи события')} disabled={disabled}><Icon20SmileOutline /></IconButton>
+        <div className="fg-emoji-anchor"><IconButton label="Выбрать эмодзи события" className="fg-form-smile" aria-expanded={emojiOpen} onClick={() => setEmojiOpen(v=>!v)} disabled={disabled}>{emoji ? <span className="fg-event-emoji">{emoji}</span> : <Icon20SmileOutline />}</IconButton>
+          {emojiOpen && <div className="fg-emoji-menu" role="group" aria-label="Эмодзи события">{['📅','💬','📌','🎯','🤝','✨','📝','🚀'].map(e=><Tappable key={e} aria-label={'Выбрать '+e} onClick={()=>{setEmoji(e);setEmojiOpen(false);}}>{e}</Tappable>)}</div>}
+        </div>
         {aiDone ? <Textarea className="fg-form-title fg-title-multiline" aria-label="Название события" placeholder="Добавьте название"
           rows={2} value={title} onChange={e => setTitle(e.target.value)} />
         : <Input mode="plain" className="fg-form-title" aria-label="Название события" placeholder="Добавьте название"
@@ -191,6 +226,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
         </div>
       </div>
       <div className="fg-form-fields">
+        {aiError && !disabled && <div className="fg-field-error" role="alert">{aiError}</div>}
         <div className="fg-form-row fg-time-row"><Icon20ClockOutline className="fg-row-icon" />
           <div className="fg-time-controls">
             <CustomSelect className="fg-day-select" aria-label="Дата события" disabled={disabled} value={String(day)} mode="plain" icon={null}
@@ -207,6 +243,14 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
             <Checkbox className="fg-day-checkbox" disabled={disabled} checked={allDay} onChange={e => setAllDay(e.target.checked)}>Весь день</Checkbox>
           </div>
         </div>
+        {isApplied && people.length > 0 && <div className="fg-free-slots">
+          <Tappable className="fg-availability-toggle" aria-expanded={availabilityOpen} onClick={()=>setAvailabilityOpen(v=>!v)}>
+            {hasConflict ? 'Один участник занят · свободное время:' : 'Все участники свободны · другие варианты:'} <span>{availabilityOpen ? 'Скрыть варианты' : 'Найти время'}</span>
+          </Tappable>
+          {availabilityOpen && <div className="fg-availability-options" role="group" aria-label="Предложенные свободные слоты">
+            {FREE_SLOTS.map(slot=><Button className="fg-availability-pill" mode="secondary" size="s" key={slot.label} onClick={()=>{setDay(slot.day);setFrom(slot.start);setTo(slot.start+30);setTimeStartDraft(null);setTimeEndDraft(null);setAvailabilityOpen(false);}}>{slot.label}</Button>)}
+          </div>}
+        </div>}
         {people.length ? (
           <div className="fg-member-section">
             <div className="fg-member-header">
@@ -222,14 +266,14 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
                     <Avatar size={24} initials={p.initials} alt={p.name} gradientColor={(i % 6 + 1) as 1 | 2 | 3 | 4 | 5 | 6}/>
                     <span>{p.name}{p.role && <span className="fg-muted"> {p.role}</span>}</span>
                   </div>)}</div>
-                  <Button mode="tertiary" className="fg-member-add" before={<Icon20AddFallback />} onClick={() => setPeopleQuery(' ')}>Добавить</Button>
+                  <Button mode="tertiary" className="fg-member-add" before={<Icon20AddFallback />} onClick={() => {setPeopleQuery(' ');requestAnimationFrame(()=>peopleInputRef.current?.focus());}}>Добавить</Button>
                 </> : <>
                   <div className="fg-member-preview"><div className="fg-avatar-stack">
                     {people.slice(0, 3).map((p, i) => <Avatar key={i} size={24} initials={p.initials} gradientColor={(i % 6 + 1) as 1 | 2 | 3 | 4 | 5 | 6} />)}
-                  </div><span>Вы, Елисей, Алиса</span><Button mode="tertiary" onClick={() => setParticipantsExpanded(true)}>Ещё {people.length - 3}</Button></div>
-                  <Button mode="tertiary" className="fg-member-add" before={<Icon20AddFallback />} onClick={() => setPeopleQuery(' ')}>Добавить</Button>
+                  </div><span>Вы, Елисей, Алиса</span><Button mode="tertiary" onClick={() => {setParticipantsExpanded(true);setAvailabilityOpen(false);}}>Ещё {people.length - 3}</Button></div>
+                  <Button mode="tertiary" className="fg-member-add" before={<Icon20AddFallback />} onClick={() => {setPeopleQuery(' ');requestAnimationFrame(()=>peopleInputRef.current?.focus());}}>Добавить</Button>
                 </>}
-                {!!peopleQuery && <Input mode="plain" placeholder="Имя или почта" aria-label="Добавить участника" value={peopleQuery}
+                {!!peopleQuery && <Input getRef={peopleInputRef} mode="plain" placeholder="Имя или почта" aria-label="Добавить участника" value={peopleQuery}
                   onChange={e => setPeopleQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && peopleQuery.trim()) {setPeople(v => [...v, {name:peopleQuery.trim(),initials:peopleQuery.trim().slice(0,2)}]);setPeopleQuery('');} }} />}
               </div>
             </div>
@@ -247,7 +291,17 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
         </div>
         {description && <div className="fg-form-row fg-description-row"><Icon20ArticleBoxOutline className="fg-row-icon" />
           <Textarea className="fg-description" aria-label="Описание" value={description} onChange={e => setDescription(e.target.value)} rows={3}/></div>}
-        {place && <div className="fg-form-row"><Icon20PlaceOutline className="fg-row-icon" /><Input mode="plain" className="fg-simple-input" placeholder="Введите место" aria-label="Место" /></div>}
+        {place && <div className="fg-form-row fg-room-row"><Icon20PlaceOutline className="fg-row-icon" />
+          <div className="fg-room-anchor"><Button className="fg-room-button" mode="tertiary" onClick={()=>setRoomOpen(v=>!v)} aria-expanded={roomOpen}>
+            {roomId ? ROOMS.find(r=>r.id===roomId)?.name : 'Выбрать переговорную'} <Icon16Dropdown />
+          </Button>
+          {roomOpen && <div className="fg-room-menu" role="listbox" aria-label="Выбрать переговорную">
+            {ROOMS.map(r=><Tappable className="fg-room-option" key={r.id} role="option" aria-selected={roomId===r.id} onClick={()=>{setRoomId(r.id);setRoomOpen(false);}}>
+              <span>{r.name}</span><small className={r.free?'fg-room-free':'fg-room-busy'}>{r.free?'Свободна':'Занята'} · до {r.cap} человек</small>
+            </Tappable>)}
+          </div>}</div>
+          <IconButton label="Убрать место" onClick={()=>{setRoomId('');setRoomOpen(false);setPlace(false);}}><Icon20Cancel /></IconButton>
+        </div>}
         {repeat && <SimpleCell className="fg-extra-line" before={<Icon20Arrow2SquarepathOutline />} onClick={() => setRepeat(false)}>Каждую неделю · убрать</SimpleCell>}
         {files && <SimpleCell className="fg-extra-line" before={<Icon20Attach />} onClick={() => alert('Файлы прикрепляются в демоверсии')}>Прикрепить файл</SimpleCell>}
         {notify && <SimpleCell className="fg-extra-line" before={<Icon20NotificationOutline />} onClick={() => setNotify(false)}>За 15 минут · убрать</SimpleCell>}
@@ -296,6 +350,7 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
       <div className="fg-demo-buttons"><Button mode="secondary" size="s" onClick={() => resetForm()}>Новая форма</Button>
       <Button mode="secondary" size="s" onClick={() => {resetForm();startAI();}}>Нейропомощник</Button>
       <Button mode="secondary" size="s" onClick={() => { resetForm();setTitle(AI_RESULT_TITLE);setFrom(720);setTo(750);setPeople(FAKE_PEOPLE);setCallLink('https://calls.mail.ru/room/36894w9a');setDescription(AI_RESULT_DESCRIPTION);setScreen('ai-done'); }}>После заполнения</Button>
+      <Button mode="secondary" size="s" onClick={() => {resetForm();setTitle(AI_RESULT_TITLE);setFrom(660);setTo(690);setPeople(FAKE_PEOPLE);setCallLink('https://calls.mail.ru/room/36894w9a');setDescription(AI_RESULT_DESCRIPTION);setScreen('ai-applied');setAvailabilityOpen(true);}}>Решение · свободные слоты</Button>
       <Button mode="tertiary" size="s" onClick={onLegacy}>Предыдущие сценарии</Button>
       <div className="fg-example-prompts" role="group" aria-label="Примеры запросов нейропомощнику">
         {AI_EXAMPLES.map((ex, i) => <Button size="s" mode="tertiary" key={ex} onClick={() => startAI(ex)}>{['1:1', 'Синк', 'Квартальная встреча', 'Jira SP-30329'][i]}</Button>)}
@@ -355,19 +410,21 @@ export default function FigmaCalendar({ onLegacy }: { onLegacy: () => void }) {
               </div>
             </div>
           </div>
-          {showForm && <div className={'fg-event-form fg-mode-'+screen+(participantsExpanded && aiDone ? ' fg-participants-expanded' : '')} data-testid="event-form">
+          {showForm && <div className={'fg-event-form fg-mode-'+screen+(participantsExpanded && aiDone ? ' fg-participants-expanded' : '')+(availabilityOpen && isApplied ? ' fg-with-slots' : '')} data-testid="event-form">
             <div className="fg-event-head">
-              {compact ? <Tappable className="fg-ai-entry" onClick={() => startAI()}><Icon20Stars /><span>Заполнить с нейропомощником</span></Tappable>
+              {compact || isApplied ? <Tappable className="fg-ai-entry" onClick={() => startAI(isApplied ? (submittedPrompt||AI_JIRA_REQUEST) : AI_DEFAULT)}><Icon20Stars /><span>{isApplied ? 'Изменить с нейропомощником' : 'Заполнить с нейропомощником'}</span></Tappable>
+              : screen==='ai-done' ? <div className="fg-ai-result-head"><Tappable onClick={applyAI} className="fg-ai-result-apply" aria-label="Применить заполнение и вернуться к событию"><Icon20ChevronLeftOutline /><span>Заполнил 4 поля</span></Tappable>
+                  <Button mode="tertiary" size="s" before={<Icon20ArrowUturnLeftOutline />} onClick={undoAI}>Отменить</Button></div>
               : <Tappable className="fg-ai-entry fg-ai-back" onClick={leaveAI}><Icon20ChevronLeftOutline /><span>Нейропомощник</span></Tappable>}
               <IconButton label="Закрыть форму" className="fg-form-close" onClick={()=>setShowForm(false)}><Icon20Cancel /></IconButton>
             </div>
-            {isAI && <div className={'fg-ai-panel'+(aiDone?' fg-ai-completed':'')}>
+            {isAI && screen !== 'ai-applied' && <div className={'fg-ai-panel'+(aiDone?' fg-ai-completed':'')}>
               {aiDone ? <div className="fg-ai-success"><Icon20CheckCircleOutline /><span>Заполнил 4 поля</span><Button mode="tertiary" onClick={undoAI} before={<Icon20ArrowUturnLeftOutline />}>Отменить</Button></div>
-                : screen==='ai-compose' ? <><Textarea aria-label="Запрос нейропомощнику" className="fg-ai-text" placeholder="1:1 с дизайнером" value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)} />
+                : screen==='ai-compose' ? <><Textarea aria-label="Запрос нейропомощнику" className="fg-ai-text" placeholder="1:1 с дизайнером" value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();fillAI();}}} />
                    <div className="fg-ai-bottom"><IconButton label="Прикрепить файл" onClick={()=>alert('Вложения в демонстрации')}><Icon20Attach /></IconButton><Button mode="primary" disabled={!aiPrompt.trim()} onClick={fillAI}>Заполнить</Button></div></>
                 : <div className="fg-ai-message">{submittedContent}</div>}
             </div>}
-            <div className={'fg-card-inner'+(screen==='ai-wait' ? ' fg-loading-card' : '')}>{screen === 'ai-wait' ? waitBody : formBody(aiBlocked)}</div>
+            <div className={'fg-card-inner'+(screen==='ai-wait' ? ' fg-loading-card' : '')} key={screen==='ai-done'?'ai-done':screen==='ai-applied'?'ai-applied':screen==='event'?'event':'ai-pending'}>{screen === 'ai-wait' ? waitBody : formBody(aiBlocked)}</div>
           </div>}
         </main>
       </div>
