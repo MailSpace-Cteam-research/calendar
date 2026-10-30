@@ -59,7 +59,7 @@ function presetState(k: string, prev: St): St {
 }
 
 export default function App() {
-  const [s, setS] = useState<St>(() => presetState('figma', { growRule: 'logistics' } as St));
+  const [s, setS] = useState<St>(() => presetState('s2', { growRule: 'logistics' } as St));
   const [hover, setHover] = useState<number | null>(null);
   const flipFrom = useRef<DOMRect | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
